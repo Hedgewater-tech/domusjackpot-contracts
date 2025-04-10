@@ -3,6 +3,7 @@ dotenv.config();
 import { HardhatUserConfig } from "hardhat/config";
 import "@nomicfoundation/hardhat-ethers";
 import "@nomicfoundation/hardhat-chai-matchers";
+import "@openzeppelin/hardhat-upgrades";
 import "@typechain/hardhat";
 import "hardhat-gas-reporter";
 import "solidity-coverage";
@@ -60,6 +61,17 @@ const config: HardhatUserConfig = {
           viaIR: true, // Enable IR-based code generation to fix "Stack too deep" errors
         },
       },
+      {
+        version: "0.8.9",
+        settings: {
+          optimizer: {
+            enabled: true,
+            // https://docs.soliditylang.org/en/latest/using-the-compiler.html#optimizer-options
+            runs: 200,
+          },
+          viaIR: true, // Enable IR-based code generation to fix "Stack too deep" errors
+        },
+      },
     ],
   },
   defaultNetwork: "localhost",
@@ -74,8 +86,8 @@ const config: HardhatUserConfig = {
     // If the network you are looking for is not here you can add new network settings
     hardhat: {
       forking: {
-        url: "https://rpc.hyperliquid-testnet.xyz/evm",
-        enabled: true,
+        url: `https://eth-mainnet.alchemyapi.io/v2/${providerApiKey}`,
+        enabled: process.env.MAINNET_FORKING_ENABLED === "true",
       },
     },
     mainnet: {

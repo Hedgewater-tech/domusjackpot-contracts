@@ -1,0 +1,467 @@
+{
+  "manifestVersion": "3.2",
+  "proxies": [
+    {
+      "address": "0x5C08d963d77E3813d5CCe69B89edAA8c88Fe601a",
+      "txHash": "0x7c7b5f7259ec7125298e0c909a90ec482ee5c5cbb763186876cb075537591272",
+      "kind": "uups"
+    }
+  ],
+  "impls": {
+    "45233cbda2a418125e24e7053a05fcd80fbe0ed9fbc2d70402286f3498728e1f": {
+      "address": "0x9CDa2A8a609519834BD11A48534BF27b878B506a",
+      "txHash": "0xe837df0ae8ae9c858d49acfa3ef1e9ea9bfd796db87ccfd1bc390cd6eb9acce8",
+      "layout": {
+        "solcVersion": "0.8.23",
+        "storage": [
+          {
+            "label": "entropy",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_contract(IEntropy)10446",
+            "contract": "BaseJackpot",
+            "src": "contracts/BaseJackpot.sol:23"
+          },
+          {
+            "label": "entropyProvider",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_address",
+            "contract": "BaseJackpot",
+            "src": "contracts/BaseJackpot.sol:24"
+          },
+          {
+            "label": "usersInfo",
+            "offset": 0,
+            "slot": "2",
+            "type": "t_mapping(t_address,t_struct(User)6966_storage)",
+            "contract": "BaseJackpot",
+            "src": "contracts/BaseJackpot.sol:36"
+          },
+          {
+            "label": "lpsInfo",
+            "offset": 0,
+            "slot": "3",
+            "type": "t_mapping(t_address,t_struct(LP)6787_storage)",
+            "contract": "BaseJackpot",
+            "src": "contracts/BaseJackpot.sol:37"
+          },
+          {
+            "label": "activeUserAddresses",
+            "offset": 0,
+            "slot": "4",
+            "type": "t_array(t_address)dyn_storage",
+            "contract": "BaseJackpot",
+            "src": "contracts/BaseJackpot.sol:41"
+          },
+          {
+            "label": "activeLpAddresses",
+            "offset": 0,
+            "slot": "5",
+            "type": "t_array(t_address)dyn_storage",
+            "contract": "BaseJackpot",
+            "src": "contracts/BaseJackpot.sol:45"
+          },
+          {
+            "label": "ticketPrice",
+            "offset": 0,
+            "slot": "6",
+            "type": "t_uint256",
+            "contract": "BaseJackpot",
+            "src": "contracts/BaseJackpot.sol:49"
+          },
+          {
+            "label": "roundDurationInSeconds",
+            "offset": 0,
+            "slot": "7",
+            "type": "t_uint256",
+            "contract": "BaseJackpot",
+            "src": "contracts/BaseJackpot.sol:51"
+          },
+          {
+            "label": "lastJackpotEndTime",
+            "offset": 0,
+            "slot": "8",
+            "type": "t_uint256",
+            "contract": "BaseJackpot",
+            "src": "contracts/BaseJackpot.sol:53"
+          },
+          {
+            "label": "lpPoolTotal",
+            "offset": 0,
+            "slot": "9",
+            "type": "t_uint256",
+            "contract": "BaseJackpot",
+            "src": "contracts/BaseJackpot.sol:55"
+          },
+          {
+            "label": "lpPoolCap",
+            "offset": 0,
+            "slot": "10",
+            "type": "t_uint256",
+            "contract": "BaseJackpot",
+            "src": "contracts/BaseJackpot.sol:57"
+          },
+          {
+            "label": "userPoolTotal",
+            "offset": 0,
+            "slot": "11",
+            "type": "t_uint256",
+            "contract": "BaseJackpot",
+            "src": "contracts/BaseJackpot.sol:59"
+          },
+          {
+            "label": "ticketCountTotalBps",
+            "offset": 0,
+            "slot": "12",
+            "type": "t_uint256",
+            "contract": "BaseJackpot",
+            "src": "contracts/BaseJackpot.sol:61"
+          },
+          {
+            "label": "lastWinnerAddress",
+            "offset": 0,
+            "slot": "13",
+            "type": "t_address",
+            "contract": "BaseJackpot",
+            "src": "contracts/BaseJackpot.sol:63"
+          },
+          {
+            "label": "jackpotLock",
+            "offset": 20,
+            "slot": "13",
+            "type": "t_bool",
+            "contract": "BaseJackpot",
+            "src": "contracts/BaseJackpot.sol:65"
+          },
+          {
+            "label": "entropyCallbackLock",
+            "offset": 21,
+            "slot": "13",
+            "type": "t_bool",
+            "contract": "BaseJackpot",
+            "src": "contracts/BaseJackpot.sol:67"
+          },
+          {
+            "label": "feeBps",
+            "offset": 0,
+            "slot": "14",
+            "type": "t_uint256",
+            "contract": "BaseJackpot",
+            "src": "contracts/BaseJackpot.sol:70"
+          },
+          {
+            "label": "allFeesTotal",
+            "offset": 0,
+            "slot": "15",
+            "type": "t_uint256",
+            "contract": "BaseJackpot",
+            "src": "contracts/BaseJackpot.sol:72"
+          },
+          {
+            "label": "lpFeesTotal",
+            "offset": 0,
+            "slot": "16",
+            "type": "t_uint256",
+            "contract": "BaseJackpot",
+            "src": "contracts/BaseJackpot.sol:74"
+          },
+          {
+            "label": "referralFeeBps",
+            "offset": 0,
+            "slot": "17",
+            "type": "t_uint256",
+            "contract": "BaseJackpot",
+            "src": "contracts/BaseJackpot.sol:76"
+          },
+          {
+            "label": "referralFeesTotal",
+            "offset": 0,
+            "slot": "18",
+            "type": "t_uint256",
+            "contract": "BaseJackpot",
+            "src": "contracts/BaseJackpot.sol:78"
+          },
+          {
+            "label": "referralFeesClaimable",
+            "offset": 0,
+            "slot": "19",
+            "type": "t_mapping(t_address,t_uint256)",
+            "contract": "BaseJackpot",
+            "src": "contracts/BaseJackpot.sol:80"
+          },
+          {
+            "label": "protocolFeeAddress",
+            "offset": 0,
+            "slot": "20",
+            "type": "t_address",
+            "contract": "BaseJackpot",
+            "src": "contracts/BaseJackpot.sol:82"
+          },
+          {
+            "label": "protocolFeeClaimable",
+            "offset": 0,
+            "slot": "21",
+            "type": "t_uint256",
+            "contract": "BaseJackpot",
+            "src": "contracts/BaseJackpot.sol:84"
+          },
+          {
+            "label": "fallbackWinner",
+            "offset": 0,
+            "slot": "22",
+            "type": "t_address",
+            "contract": "BaseJackpot",
+            "src": "contracts/BaseJackpot.sol:86"
+          },
+          {
+            "label": "lpLimit",
+            "offset": 0,
+            "slot": "23",
+            "type": "t_uint256",
+            "contract": "BaseJackpot",
+            "src": "contracts/BaseJackpot.sol:88"
+          },
+          {
+            "label": "minLpDeposit",
+            "offset": 0,
+            "slot": "24",
+            "type": "t_uint256",
+            "contract": "BaseJackpot",
+            "src": "contracts/BaseJackpot.sol:90"
+          },
+          {
+            "label": "userLimit",
+            "offset": 0,
+            "slot": "25",
+            "type": "t_uint256",
+            "contract": "BaseJackpot",
+            "src": "contracts/BaseJackpot.sol:92"
+          },
+          {
+            "label": "allowPurchasing",
+            "offset": 0,
+            "slot": "26",
+            "type": "t_bool",
+            "contract": "BaseJackpot",
+            "src": "contracts/BaseJackpot.sol:94"
+          },
+          {
+            "label": "token",
+            "offset": 1,
+            "slot": "26",
+            "type": "t_contract(IERC20)2374",
+            "contract": "BaseJackpot",
+            "src": "contracts/BaseJackpot.sol:96"
+          },
+          {
+            "label": "tokenDecimals",
+            "offset": 0,
+            "slot": "27",
+            "type": "t_uint256",
+            "contract": "BaseJackpot",
+            "src": "contracts/BaseJackpot.sol:98"
+          },
+          {
+            "label": "protocolFeeThreshold",
+            "offset": 0,
+            "slot": "28",
+            "type": "t_uint256",
+            "contract": "BaseJackpot",
+            "src": "contracts/BaseJackpot.sol:100"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "29",
+            "type": "t_array(t_uint256)50_storage",
+            "contract": "BaseJackpot",
+            "src": "contracts/BaseJackpot.sol:103"
+          }
+        ],
+        "types": {
+          "t_address": {
+            "label": "address",
+            "numberOfBytes": "20"
+          },
+          "t_bool": {
+            "label": "bool",
+            "numberOfBytes": "1"
+          },
+          "t_struct(InitializableStorage)128_storage": {
+            "label": "struct Initializable.InitializableStorage",
+            "members": [
+              {
+                "label": "_initialized",
+                "type": "t_uint64",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "_initializing",
+                "type": "t_bool",
+                "offset": 8,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_struct(Ownable2StepStorage)13_storage": {
+            "label": "struct Ownable2StepUpgradeable.Ownable2StepStorage",
+            "members": [
+              {
+                "label": "_pendingOwner",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_struct(OwnableStorage)68_storage": {
+            "label": "struct OwnableUpgradeable.OwnableStorage",
+            "members": [
+              {
+                "label": "_owner",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_uint64": {
+            "label": "uint64",
+            "numberOfBytes": "8"
+          },
+          "t_array(t_address)dyn_storage": {
+            "label": "address[]",
+            "numberOfBytes": "32"
+          },
+          "t_array(t_uint256)50_storage": {
+            "label": "uint256[50]",
+            "numberOfBytes": "1600"
+          },
+          "t_contract(IERC20)2374": {
+            "label": "contract IERC20",
+            "numberOfBytes": "20"
+          },
+          "t_contract(IEntropy)10446": {
+            "label": "contract IEntropy",
+            "numberOfBytes": "20"
+          },
+          "t_mapping(t_address,t_struct(LP)6787_storage)": {
+            "label": "mapping(address => struct BaseJackpot.LP)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_address,t_struct(User)6966_storage)": {
+            "label": "mapping(address => struct BaseJackpot.User)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_address,t_uint256)": {
+            "label": "mapping(address => uint256)",
+            "numberOfBytes": "32"
+          },
+          "t_struct(LP)6787_storage": {
+            "label": "struct BaseJackpot.LP",
+            "members": [
+              {
+                "label": "principal",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "stake",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "1"
+              },
+              {
+                "label": "riskPercentage",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "2"
+              },
+              {
+                "label": "active",
+                "type": "t_bool",
+                "offset": 0,
+                "slot": "3"
+              }
+            ],
+            "numberOfBytes": "128"
+          },
+          "t_struct(User)6966_storage": {
+            "label": "struct BaseJackpot.User",
+            "members": [
+              {
+                "label": "ticketsPurchasedTotalBps",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "winningsClaimable",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "1"
+              },
+              {
+                "label": "active",
+                "type": "t_bool",
+                "offset": 0,
+                "slot": "2"
+              }
+            ],
+            "numberOfBytes": "96"
+          },
+          "t_uint256": {
+            "label": "uint256",
+            "numberOfBytes": "32"
+          }
+        },
+        "namespaces": {
+          "erc7201:openzeppelin.storage.Ownable2Step": [
+            {
+              "contract": "Ownable2StepUpgradeable",
+              "label": "_pendingOwner",
+              "type": "t_address",
+              "src": "@openzeppelin/contracts-upgradeable/access/Ownable2StepUpgradeable.sol:29",
+              "offset": 0,
+              "slot": "0"
+            }
+          ],
+          "erc7201:openzeppelin.storage.Ownable": [
+            {
+              "contract": "OwnableUpgradeable",
+              "label": "_owner",
+              "type": "t_address",
+              "src": "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol:24",
+              "offset": 0,
+              "slot": "0"
+            }
+          ],
+          "erc7201:openzeppelin.storage.Initializable": [
+            {
+              "contract": "Initializable",
+              "label": "_initialized",
+              "type": "t_uint64",
+              "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:69",
+              "offset": 0,
+              "slot": "0"
+            },
+            {
+              "contract": "Initializable",
+              "label": "_initializing",
+              "type": "t_bool",
+              "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:73",
+              "offset": 8,
+              "slot": "0"
+            }
+          ]
+        }
+      }
+    }
+  }
+}

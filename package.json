@@ -58,6 +58,7 @@
     "node": ">=20.18.3"
   },
   "dependencies": {
-    "@openzeppelin/contracts-upgradeable": "^5.2.0"
+    "@openzeppelin/contracts-upgradeable": "^5.2.0",
+    "@openzeppelin/hardhat-upgrades": "^3.9.0"
   }
 }
