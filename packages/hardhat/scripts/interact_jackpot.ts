@@ -46,6 +46,66 @@ async function main() {
       const price = await jackpot.ticketPrice();
       console.log(`Ticket Price: ${ethers.formatUnits(price, 18)}`);
       break;
+
+    case "runJackpot":
+      console.log("Attempting to run jackpot...");
+      try {
+        // Check if jackpot can be run
+        const [lastJackpotEndTime, roundDuration, currentTime] = await Promise.all([
+          jackpot.lastJackpotEndTime(),
+          jackpot.roundDurationInSeconds(),
+          provider.getBlock("latest").then(block => block?.timestamp || 0),
+        ]);
+
+        const nextJackpotTime = Number(lastJackpotEndTime) + Number(roundDuration);
+        console.log(`Last jackpot time: ${new Date(Number(lastJackpotEndTime) * 1000).toLocaleString()}`);
+        console.log(`Next jackpot available: ${new Date(nextJackpotTime * 1000).toLocaleString()}`);
+
+        if (currentTime < nextJackpotTime) {
+          console.log(
+            `Jackpot cannot be run yet. Please wait until ${new Date(nextJackpotTime * 1000).toLocaleString()}`,
+          );
+          console.log(`Time remaining: ${(nextJackpotTime - currentTime) / 60} minutes`);
+          break;
+        }
+
+        // Generate a random number for entropy
+        const randomBytes = ethers.randomBytes(32);
+        const userRandomNumber = ethers.hexlify(randomBytes);
+        console.log(`Using random number: ${userRandomNumber}`);
+
+        // Send transaction with ETH value for entropy fee (0.01 ETH as a safe default)
+        const entropyFee = ethers.parseEther("0.01");
+        console.log(`Using entropy fee: ${ethers.formatEther(entropyFee)} ETH`);
+
+        const tx = await jackpot.runJackpot(userRandomNumber, { value: entropyFee });
+        console.log(`Transaction sent: ${tx.hash}`);
+        const receipt = await tx.wait();
+        console.log(`Jackpot executed successfully in block ${receipt.blockNumber}`);
+
+        // Get the winner from events
+        const jackpotRunEvent = jackpot.interface.getEvent("JackpotRun");
+        if (jackpotRunEvent) {
+          const topicHash = jackpotRunEvent.topicHash;
+          const jackpotRunEvents = receipt.logs.filter((log: any) => log.topics[0] === topicHash);
+
+          if (jackpotRunEvents.length > 0) {
+            const event = jackpot.interface.parseLog(jackpotRunEvents[0]);
+            if (event && event.args) {
+              console.log(`Winner: ${event.args.winnerAddress}`);
+              console.log(`Prize Amount: ${ethers.formatUnits(event.args.winAmount, 18)}`);
+            }
+          } else {
+            console.log("No winner found in events");
+          }
+        } else {
+          console.log("Could not find JackpotRun event in contract interface");
+        }
+      } catch (error: any) {
+        console.error("Failed to run jackpot:", error.message || String(error));
+      }
+      break;
+
     case "getPoolTotals":
       const [userPool, lpPool] = await Promise.all([jackpot.userPoolTotal(), jackpot.lpPoolTotal()]);
       console.log(`User Pool: ${ethers.formatUnits(userPool, 18)}`);
@@ -56,6 +116,28 @@ async function main() {
       const winner = await jackpot.lastWinnerAddress();
       console.log(`Last Winner: ${winner}`);
       break;
+
+    case "getJackpotInfo":
+      // Get comprehensive jackpot information
+      const [ticketPrice, userPoolTotal, lpPoolTotal, lastWinnerAddr, lastJackpotTime, isAllowPurchasing] =
+        await Promise.all([
+          jackpot.ticketPrice(),
+          jackpot.userPoolTotal(),
+          jackpot.lpPoolTotal(),
+          jackpot.lastWinnerAddress(),
+          jackpot.lastJackpotEndTime(),
+          jackpot.allowPurchasing(),
+        ]);
+
+      console.log("=== Jackpot Information ===");
+      console.log(`Ticket Price: ${ethers.formatUnits(ticketPrice, 18)}`);
+      console.log(`User Pool Total: ${ethers.formatUnits(userPoolTotal, 18)}`);
+      console.log(`LP Pool Total: ${ethers.formatUnits(lpPoolTotal, 18)}`);
+      console.log(`Last Winner: ${lastWinnerAddr}`);
+      console.log(`Last Jackpot Time: ${new Date(Number(lastJackpotTime) * 1000).toLocaleString()}`);
+      console.log(`Purchasing Allowed: ${isAllowPurchasing}`);
+      break;
+
     case "getLPInfo":
       const lpAddress = args[0] || signer.address;
       const lpInfo = await jackpot.lpsInfo(lpAddress);
@@ -80,6 +162,7 @@ async function main() {
       console.log("buyTicket <value> <referrer>");
       console.log("depositLP <riskPercentage> <amount>");
       console.log("getTicketPrice");
+      console.log("runJackpot");
   }
 }
 

@@ -46,6 +46,11 @@ jobs:
           cd packages/hardhat
           yarn install
           
+      - name: Compile contracts
+        run: |
+          cd packages/hardhat
+          npx hardhat compile
+          
       - name: Run jackpot script
         env:
           PRIVATE_KEY: ${{ secrets.JACKPOT_PRIVATE_KEY }}
