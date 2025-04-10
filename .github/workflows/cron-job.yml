@@ -5,7 +5,27 @@ on:
     # Run daily at midnight UTC
     - cron: '0 0 * * *'
   workflow_dispatch:
-    # Allow manual triggering
+    # Allow manual triggering with options
+    inputs:
+      action:
+        description: 'Action to perform'
+        required: true
+        default: 'runJackpot'
+        type: choice
+        options:
+          - runJackpot
+          - getUserInfo
+          - getJackpotInfo
+          - getTicketPrice
+      network:
+        description: 'Network to use'
+        required: true
+        default: 'arbitrum-sepolia'
+        type: choice
+        options:
+          - arbitrum-sepolia
+          - arbitrum-one
+          - ethereum
 
 jobs:
   run-jackpot:
@@ -30,9 +50,10 @@ jobs:
         env:
           PRIVATE_KEY: ${{ secrets.JACKPOT_PRIVATE_KEY }}
           ALCHEMY_API_KEY: ${{ secrets.ALCHEMY_API_KEY }}
+          NETWORK: ${{ github.event.inputs.network || 'arbitrum-sepolia' }}
         run: |
           cd packages/hardhat
-          npx ts-node scripts/interact_jackpot.ts runJackpot
+          npx ts-node scripts/interact_jackpot.ts ${{ github.event.inputs.action || 'runJackpot' }}
           
       - name: Report status
         if: always()
