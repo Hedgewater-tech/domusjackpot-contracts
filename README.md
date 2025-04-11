@@ -205,3 +205,88 @@ solidity: {
     },
   ],
 }
+```
+
+## 🎰 BaseJackpot Smart Contract
+
+The BaseJackpot contract is a sophisticated jackpot system with liquidity provider (LP) functionality that allows users to participate in regular jackpot rounds.
+
+### Operational Flow
+
+#### 1. Contract Initialization
+- The contract is initialized with key parameters:
+  - Owner address
+  - Entropy provider address (for randomness)
+  - Token address (ERC20 token used for tickets)
+  - Ticket price
+
+#### 2. Round Preparation
+- LPs deposit tokens with a specified risk percentage
+  - LPs provide liquidity to the jackpot pool
+  - Risk percentage determines their exposure to potential losses
+- Users purchase tickets using the specified ERC20 token
+  - Users can purchase tickets with or without referrals
+  - Referrals receive a percentage of the ticket price as a fee
+
+#### 3. Jackpot Execution
+- The jackpot can be executed once per round (default: 24 hours)
+- Execution requirements:
+  - Current time must be ≥ lastJackpotEndTime + roundDurationInSeconds
+  - The jackpotLock must be false (no jackpot currently running)
+  - Sufficient ETH must be provided to cover the entropy fee
+- Execution process:
+  1. The jackpotLock is set to true to prevent concurrent executions
+  2. A random number is requested from the entropy provider
+  3. When the random number is received, a winner is selected
+  4. Prizes are distributed to the winner
+  5. Fees are allocated to the protocol and referrers
+  6. The jackpot is reset for the next round
+
+#### 4. Prize Distribution
+- The winner receives a portion of the jackpot pool
+- LP providers receive returns based on their risk percentage
+- Protocol fees are collected
+- Referral fees are distributed to referrers
+
+#### 5. Automation
+- The jackpot execution is automated through a GitHub Actions workflow
+- The workflow can be triggered:
+  - Automatically on a daily schedule
+  - Manually through the GitHub UI with configurable parameters
+- The automation ensures timely execution of jackpot rounds without manual intervention
+
+### Key Functions
+
+#### For Users
+- `purchaseTickets`: Buy tickets for the current jackpot round
+- `getTicketPrice`: Get the current ticket price
+- `getUserInfo`: Get information about a user's tickets and winnings
+
+#### For Liquidity Providers
+- `lpDeposit`: Deposit tokens as a liquidity provider with a specified risk percentage
+- `lpWithdraw`: Withdraw LP tokens and accrued fees
+- `getLPInfo`: Get information about an LP's deposits and earnings
+
+#### For Jackpot Operations
+- `runJackpot`: Execute the jackpot process and select a winner
+- `getJackpotInfo`: Get comprehensive information about the current jackpot state
+- `getJackpotStatus`: Check if the jackpot is currently running and when the next round is available
+
+### Automation Tools
+
+The project includes scripts and GitHub Actions workflows for automated jackpot operations:
+
+- `interact_jackpot.ts`: Script for interacting with the BaseJackpot contract
+  - Commands for purchasing tickets, depositing LP, and running the jackpot
+  - Functions for retrieving jackpot information and status
+  
+- `cron-job.yml`: GitHub Actions workflow for automated jackpot execution
+  - Scheduled daily execution
+  - Manual triggering with configurable parameters
+  - Network selection for different environments
+
+### Security Considerations
+- The contract uses a trusted entropy source for randomness
+- Timelock mechanisms prevent premature jackpot executions
+- The jackpotLock prevents concurrent executions
+- Fee calculations ensure fair distribution of prizes and incentives

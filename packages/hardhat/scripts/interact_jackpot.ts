@@ -135,7 +135,37 @@ async function main() {
       console.log(`LP Pool Total: ${ethers.formatUnits(lpPoolTotal, 18)}`);
       console.log(`Last Winner: ${lastWinnerAddr}`);
       console.log(`Last Jackpot Time: ${new Date(Number(lastJackpotTime) * 1000).toLocaleString()}`);
-      console.log(`Purchasing Allowed: ${isAllowPurchasing}`);
+      console.log(`Purchasing Allowed: ${isAllowPurchasing ? "Yes" : "No"}`);
+      break;
+
+    case "getJackpotStatus":
+      // Get jackpot status information
+      const [jackpotLock, lastEndTime, roundDuration, currentBlockTime] = await Promise.all([
+        jackpot.jackpotLock(),
+        jackpot.lastJackpotEndTime(),
+        jackpot.roundDurationInSeconds(),
+        provider.getBlock("latest").then(block => block?.timestamp || 0),
+      ]);
+
+      const nextRoundTime = Number(lastEndTime) + Number(roundDuration);
+      const canRunJackpot = currentBlockTime >= nextRoundTime && !jackpotLock;
+      const timeRemaining = nextRoundTime - currentBlockTime;
+
+      console.log("=== Jackpot Status ===");
+      console.log(`Jackpot Currently Running: ${jackpotLock ? "Yes" : "No"}`);
+      console.log(`Last Jackpot End Time: ${new Date(Number(lastEndTime) * 1000).toLocaleString()}`);
+      console.log(`Next Jackpot Available: ${new Date(nextRoundTime * 1000).toLocaleString()}`);
+
+      if (canRunJackpot) {
+        console.log("Jackpot can be run now!");
+      } else if (timeRemaining > 0) {
+        const hours = Math.floor(timeRemaining / 3600);
+        const minutes = Math.floor((timeRemaining % 3600) / 60);
+        const seconds = timeRemaining % 60;
+        console.log(`Time until next jackpot: ${hours}h ${minutes}m ${seconds}s`);
+      } else if (jackpotLock) {
+        console.log("Jackpot is currently in progress. Please wait for it to complete.");
+      }
       break;
 
     case "getLPInfo":
@@ -158,11 +188,17 @@ async function main() {
       break;
 
     default:
-      console.log("Available functions:");
+      console.log("Unknown command. Available commands:");
       console.log("buyTicket <value> <referrer>");
       console.log("depositLP <riskPercentage> <amount>");
       console.log("getTicketPrice");
       console.log("runJackpot");
+      console.log("getPoolTotals");
+      console.log("getLastWinner");
+      console.log("getJackpotInfo");
+      console.log("getJackpotStatus");
+      console.log("getLPInfo");
+      console.log("getUserInfo");
   }
 }
 

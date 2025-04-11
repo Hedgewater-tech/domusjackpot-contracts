@@ -17,6 +17,7 @@ on:
           - getUserInfo
           - getJackpotInfo
           - getTicketPrice
+          - getJackpotStatus
       network:
         description: 'Network to use'
         required: true
