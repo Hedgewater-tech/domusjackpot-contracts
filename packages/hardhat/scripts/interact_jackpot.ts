@@ -10,7 +10,7 @@ dotenv.config({ path: path.resolve(__dirname, "../.env") });
 
 // Configuration
 const RPC_URL = "https://arb-sepolia.g.alchemy.com/v2/2Q9eoOjO011kr5tnMrZxonEo1Lqasted";
-const CONTRACT_ADDRESS = "0x3EA4857E2402D9671a7289233024f00728Fa8314";
+const CONTRACT_ADDRESS = "0x5C08d963d77E3813d5CCe69B89edAA8c88Fe601a";
 // Use the private key from .env or fallback to the hardcoded one for testing
 const PRIVATE_KEY = process.env.PRIVATE_KEY;
 
@@ -40,6 +40,90 @@ async function main() {
       const [riskPercentage, amount] = args;
       await jackpot.lpDeposit(Number(riskPercentage), amount);
       console.log(`Deposited ${amount} as LP with ${riskPercentage}% risk`);
+      break;
+
+    case "depositLPWithApproval":
+      if (args.length < 2) {
+        console.log("Usage: depositLPWithApproval <riskPercentage> <amount>");
+        break;
+      }
+
+      const [lpRiskPercentage, lpAmount] = args;
+
+      // Check if jackpot is running
+      const isJackpotRunning = await jackpot.jackpotLock();
+      if (isJackpotRunning) {
+        console.log("Cannot deposit LP while jackpot is running. Please try again later.");
+        break;
+      }
+
+      // Use the specific USDC token address
+      const usdcTokenAddress = "0x20679F4196f17a56711AD8b04776393e8F2499Ad";
+      console.log(`Using USDC token address: ${usdcTokenAddress}`);
+
+      // Create token contract instance
+      const tokenContract = new ethers.Contract(
+        usdcTokenAddress,
+        [
+          "function approve(address spender, uint256 amount) public returns (bool)",
+          "function balanceOf(address account) public view returns (uint256)",
+          "function allowance(address owner, address spender) public view returns (uint256)",
+        ],
+        signer,
+      );
+
+      // Get user's USDC balance
+      const userBalance = await tokenContract.balanceOf(await signer.getAddress());
+      console.log(`Your USDC balance: ${ethers.formatUnits(userBalance, 6)} USDC`);
+
+      if (userBalance < ethers.parseUnits(lpAmount, 6)) {
+        console.log(`Insufficient USDC balance. You need at least ${lpAmount} USDC.`);
+        break;
+      }
+
+      // Check current allowance
+      const currentAllowance = await tokenContract.allowance(await signer.getAddress(), CONTRACT_ADDRESS);
+      console.log(`Current allowance for jackpot contract: ${ethers.formatUnits(currentAllowance, 6)} USDC`);
+
+      const depositAmount = ethers.parseUnits(lpAmount, 6);
+
+      // Approve jackpot contract to spend tokens if needed
+      if (currentAllowance < depositAmount) {
+        console.log(`Approving ${lpAmount} USDC tokens for jackpot contract at ${CONTRACT_ADDRESS}...`);
+        const approveTx = await tokenContract.approve(CONTRACT_ADDRESS, depositAmount);
+        await approveTx.wait();
+        console.log(`Approval transaction successful: ${approveTx.hash}`);
+      } else {
+        console.log("Sufficient allowance already exists, skipping approval step.");
+      }
+
+      // Deposit LP
+      console.log(`Depositing ${lpAmount} USDC as LP with ${lpRiskPercentage}% risk...`);
+      try {
+        const depositTx = await jackpot.lpDeposit(Number(lpRiskPercentage), depositAmount);
+        await depositTx.wait();
+        console.log(`Successfully deposited ${lpAmount} USDC as LP with ${lpRiskPercentage}% risk`);
+      } catch (error: any) {
+        console.error("LP deposit failed:", error.message || String(error));
+
+        // Provide helpful error messages based on common failure reasons
+        if (error.message) {
+          if (error.message.includes("LP deposit less than minimum")) {
+            const minLpDeposit = await jackpot.minLpDeposit();
+            console.log(`Minimum LP deposit required: ${ethers.formatUnits(minLpDeposit, 6)} USDC`);
+          } else if (error.message.includes("Deposit exceeds LP pool cap")) {
+            const [lpPoolTotal, lpPoolCap] = await Promise.all([jackpot.lpPoolTotal(), jackpot.lpPoolCap()]);
+            const availableSpace = BigInt(lpPoolCap) - BigInt(lpPoolTotal);
+            console.log(
+              `LP pool cap reached. Available space: ${ethers.formatUnits(availableSpace.toString(), 6)} USDC`,
+            );
+          } else if (error.message.includes("Invalid risk percentage")) {
+            console.log("Risk percentage must be between 1 and 100.");
+          } else if (error.message.includes("Jackpot is currently running")) {
+            console.log("Cannot deposit while jackpot is running. Please try again later.");
+          }
+        }
+      }
       break;
 
     case "getTicketPrice":
@@ -187,10 +271,126 @@ async function main() {
       console.log(`- Active: ${userInfo.active}`);
       break;
 
+    case "getLPPoolInfo":
+      // Get detailed LP pool information
+      const [poolTotal, poolCap, minDepositAmount] = await Promise.all([
+        jackpot.lpPoolTotal(),
+        jackpot.lpPoolCap(),
+        jackpot.minLpDeposit(),
+      ]);
+
+      console.log("=== LP Pool Information ===");
+      console.log(`LP Pool Total: ${ethers.formatUnits(poolTotal, 6)} USDC`);
+      console.log(`LP Pool Cap: ${ethers.formatUnits(poolCap, 6)} USDC`);
+      console.log(`Minimum LP Deposit: ${ethers.formatUnits(minDepositAmount, 6)} USDC`);
+      console.log(`Available Space: ${ethers.formatUnits((BigInt(poolCap) - BigInt(poolTotal)).toString(), 6)} USDC`);
+      break;
+
+    case "setLPPoolCap":
+      if (args.length < 1) {
+        console.log("Usage: setLPPoolCap <amount>");
+        break;
+      }
+
+      const capAmount = ethers.parseUnits(args[0], 6);
+      console.log(`Setting LP pool cap to ${args[0]} USDC...`);
+
+      try {
+        const tx = await jackpot.setLpPoolCap(capAmount);
+        await tx.wait();
+        console.log(`Successfully set LP pool cap to ${args[0]} USDC`);
+      } catch (error: any) {
+        console.error("Failed to set LP pool cap:", error.message || String(error));
+      }
+      break;
+
+    case "setTicketPrice":
+      if (args.length < 1) {
+        console.log("Usage: setTicketPrice <price>");
+        break;
+      }
+
+      const ticketPriceAmount = ethers.parseUnits(args[0], 6);
+      console.log(`Setting ticket price to ${args[0]} USDC...`);
+
+      try {
+        const tx = await jackpot.setTicketPrice(ticketPriceAmount);
+        await tx.wait();
+        console.log(`Successfully set ticket price to ${args[0]} USDC`);
+
+        // Get updated LP pool information after setting ticket price
+        const [newMinLpDeposit, newLpPoolCap] = await Promise.all([jackpot.minLpDeposit(), jackpot.lpPoolCap()]);
+
+        console.log(`New minimum LP deposit: ${ethers.formatUnits(newMinLpDeposit, 6)} USDC`);
+        console.log(`New LP pool cap: ${ethers.formatUnits(newLpPoolCap, 6)} USDC`);
+      } catch (error: any) {
+        console.error("Failed to set ticket price:", error.message || String(error));
+      }
+      break;
+
+    case "getOwner":
+      try {
+        const owner = await jackpot.owner();
+        console.log(`Contract owner: ${owner}`);
+        console.log(`Current signer: ${await signer.getAddress()}`);
+
+        if ((await signer.getAddress()).toLowerCase() === owner.toLowerCase()) {
+          console.log("You are the owner of the contract");
+        } else {
+          console.log("You are NOT the owner of the contract");
+        }
+      } catch (error: any) {
+        console.error("Failed to get owner:", error.message || String(error));
+      }
+      break;
+
+    case "initializeContract":
+      if (args.length < 3) {
+        console.log("Usage: initializeContract <entropyAddress> <tokenAddress> <ticketPrice>");
+        break;
+      }
+
+      const [entropyAddress, tokenAddress, initTicketPrice] = args;
+      const signerAddress = await signer.getAddress();
+
+      console.log(`Initializing contract with:`);
+      console.log(`- Entropy Address: ${entropyAddress}`);
+      console.log(`- Owner Address: ${signerAddress}`);
+      console.log(`- Token Address: ${tokenAddress}`);
+      console.log(`- Ticket Price: ${initTicketPrice} USDC`);
+
+      try {
+        const tx = await jackpot.initialize(
+          entropyAddress,
+          signerAddress,
+          tokenAddress,
+          ethers.parseUnits(initTicketPrice, 6),
+        );
+        await tx.wait();
+        console.log("Contract initialized successfully");
+
+        // Get updated values
+        const [owner, ticketPrice, minLpDeposit, lpPoolCap] = await Promise.all([
+          jackpot.owner(),
+          jackpot.ticketPrice(),
+          jackpot.minLpDeposit(),
+          jackpot.lpPoolCap(),
+        ]);
+
+        console.log(`New owner: ${owner}`);
+        console.log(`New ticket price: ${ethers.formatUnits(ticketPrice, 6)} USDC`);
+        console.log(`New minimum LP deposit: ${ethers.formatUnits(minLpDeposit, 6)} USDC`);
+        console.log(`New LP pool cap: ${ethers.formatUnits(lpPoolCap, 6)} USDC`);
+      } catch (error: any) {
+        console.error("Failed to initialize contract:", error.message || String(error));
+      }
+      break;
+
     default:
       console.log("Unknown command. Available commands:");
       console.log("buyTicket <value> <referrer>");
       console.log("depositLP <riskPercentage> <amount>");
+      console.log("depositLPWithApproval <riskPercentage> <amount>");
       console.log("getTicketPrice");
       console.log("runJackpot");
       console.log("getPoolTotals");
@@ -199,6 +399,11 @@ async function main() {
       console.log("getJackpotStatus");
       console.log("getLPInfo");
       console.log("getUserInfo");
+      console.log("getLPPoolInfo");
+      console.log("setLPPoolCap <amount>");
+      console.log("setTicketPrice <price>");
+      console.log("getOwner");
+      console.log("initializeContract <entropyAddress> <tokenAddress> <ticketPrice>");
   }
 }
 
