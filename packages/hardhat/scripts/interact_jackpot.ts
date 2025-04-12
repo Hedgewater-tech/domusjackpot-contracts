@@ -14,6 +14,27 @@ const CONTRACT_ADDRESS = "0x5C08d963d77E3813d5CCe69B89edAA8c88Fe601a";
 // Use the private key from .env or fallback to the hardcoded one for testing
 const PRIVATE_KEY = process.env.PRIVATE_KEY;
 
+// address:private_key
+const TEST_USERS = [
+  "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+  "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+  "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+  "0x90F79bf6EB2c4f870365E785982E1f101E93b906",
+  "0x15d34AAf54267DB7D7c367839AAf71A00a2C6A65",
+  "0x9965507D1a55bcC2695C58ba16FB37d819B0A4dc",
+  "0x976EA74026E726554dB657fA54763abd0C3a0aa9",
+];
+
+const TEST_USER_PRIVATE_KEYS = [
+  "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80",
+  "0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d",
+  "0x5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a",
+  "0x7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6",
+  "0x47e179ec197488593b187f80a00eb0da91f1b9d0b13f8733639f19c30a34926a",
+  "0x8b3a350cf5c34c9194ca85829a2df0ec3153be0318b5e2d3348e872092edffba",
+  "0x92db14e403b83dfe3df233f83dfa3a0d7096f21ca9b0d6d6b8d88b2b4ec1564e",
+];
+
 async function main() {
   if (!PRIVATE_KEY) {
     throw new Error("Private key not found");
@@ -38,17 +59,6 @@ async function main() {
 
     case "depositLP":
       const [riskPercentage, amount] = args;
-      await jackpot.lpDeposit(Number(riskPercentage), amount);
-      console.log(`Deposited ${amount} as LP with ${riskPercentage}% risk`);
-      break;
-
-    case "depositLPWithApproval":
-      if (args.length < 2) {
-        console.log("Usage: depositLPWithApproval <riskPercentage> <amount>");
-        break;
-      }
-
-      const [lpRiskPercentage, lpAmount] = args;
 
       // Check if jackpot is running
       const isJackpotRunning = await jackpot.jackpotLock();
@@ -76,8 +86,10 @@ async function main() {
       const userBalance = await tokenContract.balanceOf(await signer.getAddress());
       console.log(`Your USDC balance: ${ethers.formatUnits(userBalance, 6)} USDC`);
 
-      if (userBalance < ethers.parseUnits(lpAmount, 6)) {
-        console.log(`Insufficient USDC balance. You need at least ${lpAmount} USDC.`);
+      const depositAmount = ethers.parseUnits(amount, 6);
+
+      if (userBalance < depositAmount) {
+        console.log(`Insufficient USDC balance. You need at least ${amount} USDC.`);
         break;
       }
 
@@ -85,11 +97,9 @@ async function main() {
       const currentAllowance = await tokenContract.allowance(await signer.getAddress(), CONTRACT_ADDRESS);
       console.log(`Current allowance for jackpot contract: ${ethers.formatUnits(currentAllowance, 6)} USDC`);
 
-      const depositAmount = ethers.parseUnits(lpAmount, 6);
-
       // Approve jackpot contract to spend tokens if needed
       if (currentAllowance < depositAmount) {
-        console.log(`Approving ${lpAmount} USDC tokens for jackpot contract at ${CONTRACT_ADDRESS}...`);
+        console.log(`Approving ${amount} USDC tokens for jackpot contract at ${CONTRACT_ADDRESS}...`);
         const approveTx = await tokenContract.approve(CONTRACT_ADDRESS, depositAmount);
         await approveTx.wait();
         console.log(`Approval transaction successful: ${approveTx.hash}`);
@@ -98,11 +108,11 @@ async function main() {
       }
 
       // Deposit LP
-      console.log(`Depositing ${lpAmount} USDC as LP with ${lpRiskPercentage}% risk...`);
+      console.log(`Depositing ${amount} USDC as LP with ${riskPercentage}% risk...`);
       try {
-        const depositTx = await jackpot.lpDeposit(Number(lpRiskPercentage), depositAmount);
+        const depositTx = await jackpot.lpDeposit(Number(riskPercentage), depositAmount);
         await depositTx.wait();
-        console.log(`Successfully deposited ${lpAmount} USDC as LP with ${lpRiskPercentage}% risk`);
+        console.log(`Successfully deposited ${amount} USDC as LP with ${riskPercentage}% risk`);
       } catch (error: any) {
         console.error("LP deposit failed:", error.message || String(error));
 
@@ -116,6 +126,90 @@ async function main() {
             const availableSpace = BigInt(lpPoolCap) - BigInt(lpPoolTotal);
             console.log(
               `LP pool cap reached. Available space: ${ethers.formatUnits(availableSpace.toString(), 6)} USDC`,
+            );
+          } else if (error.message.includes("Invalid risk percentage")) {
+            console.log("Risk percentage must be between 1 and 100.");
+          } else if (error.message.includes("Jackpot is currently running")) {
+            console.log("Cannot deposit while jackpot is running. Please try again later.");
+          }
+        }
+      }
+      break;
+
+    case "depositLPWithApproval":
+      if (args.length < 2) {
+        console.log("Usage: depositLPWithApproval <riskPercentage> <amount>");
+        break;
+      }
+
+      const [lpRiskPercentage, lpAmount] = args;
+
+      // Check if jackpot is running
+      const isJackpotRunningForLP = await jackpot.jackpotLock();
+      if (isJackpotRunningForLP) {
+        console.log("Cannot deposit LP while jackpot is running. Please try again later.");
+        break;
+      }
+
+      // Use the specific USDC token address
+      const usdcTokenAddressForLP = "0x20679F4196f17a56711AD8b04776393e8F2499Ad";
+      console.log(`Using USDC token address: ${usdcTokenAddressForLP}`);
+
+      // Create token contract instance
+      const tokenContractForLP = new ethers.Contract(
+        usdcTokenAddressForLP,
+        [
+          "function approve(address spender, uint256 amount) public returns (bool)",
+          "function balanceOf(address account) public view returns (uint256)",
+          "function allowance(address owner, address spender) public view returns (uint256)",
+        ],
+        signer,
+      );
+
+      // Get user's USDC balance
+      const userBalanceForLP = await tokenContractForLP.balanceOf(await signer.getAddress());
+      console.log(`Your USDC balance: ${ethers.formatUnits(userBalanceForLP, 6)} USDC`);
+
+      if (userBalanceForLP < ethers.parseUnits(lpAmount, 6)) {
+        console.log(`Insufficient USDC balance. You need at least ${lpAmount} USDC.`);
+        break;
+      }
+
+      // Check current allowance
+      const currentAllowanceForLP = await tokenContractForLP.allowance(await signer.getAddress(), CONTRACT_ADDRESS);
+      console.log(`Current allowance for jackpot contract: ${ethers.formatUnits(currentAllowanceForLP, 6)} USDC`);
+
+      const depositAmountForLP = ethers.parseUnits(lpAmount, 6);
+
+      // Approve jackpot contract to spend tokens if needed
+      if (currentAllowanceForLP < depositAmountForLP) {
+        console.log(`Approving ${lpAmount} USDC tokens for jackpot contract at ${CONTRACT_ADDRESS}...`);
+        const approveTxForLP = await tokenContractForLP.approve(CONTRACT_ADDRESS, depositAmountForLP);
+        await approveTxForLP.wait();
+        console.log(`Approval transaction successful: ${approveTxForLP.hash}`);
+      } else {
+        console.log("Sufficient allowance already exists, skipping approval step.");
+      }
+
+      // Deposit LP
+      console.log(`Depositing ${lpAmount} USDC as LP with ${lpRiskPercentage}% risk...`);
+      try {
+        const depositTxForLP = await jackpot.lpDeposit(Number(lpRiskPercentage), depositAmountForLP);
+        await depositTxForLP.wait();
+        console.log(`Successfully deposited ${lpAmount} USDC as LP with ${lpRiskPercentage}% risk`);
+      } catch (error: any) {
+        console.error("LP deposit failed:", error.message || String(error));
+
+        // Provide helpful error messages based on common failure reasons
+        if (error.message) {
+          if (error.message.includes("LP deposit less than minimum")) {
+            const minLpDepositForLP = await jackpot.minLpDeposit();
+            console.log(`Minimum LP deposit required: ${ethers.formatUnits(minLpDepositForLP, 6)} USDC`);
+          } else if (error.message.includes("Deposit exceeds LP pool cap")) {
+            const [lpPoolTotalForLP, lpPoolCapForLP] = await Promise.all([jackpot.lpPoolTotal(), jackpot.lpPoolCap()]);
+            const availableSpaceForLP = BigInt(lpPoolCapForLP) - BigInt(lpPoolTotalForLP);
+            console.log(
+              `LP pool cap reached. Available space: ${ethers.formatUnits(availableSpaceForLP.toString(), 6)} USDC`,
             );
           } else if (error.message.includes("Invalid risk percentage")) {
             console.log("Risk percentage must be between 1 and 100.");
@@ -386,6 +480,322 @@ async function main() {
       }
       break;
 
+    case "mintUSDC":
+      if (args.length < 1) {
+        console.log("Usage: mintUSDC <recipient>");
+        break;
+      }
+
+      const mintAmount = ethers.parseUnits("5000000", 18);
+      const ethAmount = ethers.parseEther("0.01");
+      const [recipient] = args;
+      const usdcAddress = "0x20679F4196f17a56711AD8b04776393e8F2499Ad";
+
+      console.log(`Minting ${mintAmount} USDC and sending ${ethAmount} ETH to ${recipient}...`);
+
+      // Create USDC contract instance with mint function
+      const usdcContract = new ethers.Contract(
+        usdcAddress,
+        [
+          "function mint(address to, uint256 amount) external",
+          "function balanceOf(address account) external view returns (uint256)",
+        ],
+        signer,
+      );
+
+      try {
+        // Get balances before operations
+        const usdcBalanceBefore = await usdcContract.balanceOf(recipient);
+        const ethBalanceBefore = await provider.getBalance(recipient);
+
+        console.log(`USDC balance before: ${ethers.formatUnits(usdcBalanceBefore, 6)} USDC`);
+        console.log(`ETH balance before: ${ethers.formatEther(ethBalanceBefore)} ETH`);
+
+        // Send ETH transaction
+        // const ethTx = await signer.sendTransaction({
+        //   to: recipient,
+        //   value: ethers.parseEther(ethAmount),
+        // });
+        // await ethTx.wait();
+        // console.log(`Successfully sent ${ethAmount} ETH to ${recipient}`);
+
+        // Mint USDC tokens
+        const mintTx = await usdcContract.mint(recipient, ethers.parseUnits(mintAmount.toString(), 6));
+        await mintTx.wait();
+        console.log(`Successfully minted ${mintAmount} USDC to ${recipient}`);
+
+        // Get balances after operations
+        const usdcBalanceAfter = await usdcContract.balanceOf(recipient);
+        const ethBalanceAfter = await provider.getBalance(recipient);
+
+        console.log(`USDC balance after: ${ethers.formatUnits(usdcBalanceAfter, 6)} USDC`);
+        console.log(`ETH balance after: ${ethers.formatEther(ethBalanceAfter)} ETH`);
+      } catch (error: any) {
+        console.error("Operation failed:", error.message || String(error));
+        console.log("Note: This function only works if the USDC contract is a testnet version with a mint function");
+        console.log("and if your account has minting privileges.");
+      }
+      break;
+
+    case "fundTestUsers":
+      console.log("Funding all test users with 0.01 ETH and 10,000 USDC each...");
+
+      // const ethAmountPerUser = "0";
+      const usdcAmountPerUser = "10000000000000000000000";
+      const testUsdcAddress = "0x20679F4196f17a56711AD8b04776393e8F2499Ad";
+
+      // Create USDC contract instance with mint function
+      const testUsdcContract = new ethers.Contract(
+        testUsdcAddress,
+        [
+          "function mint(address to, uint256 amount) external",
+          "function balanceOf(address account) external view returns (uint256)",
+        ],
+        signer,
+      );
+
+      try {
+        // Process each test user
+        for (let i = 0; i < TEST_USERS.length; i++) {
+          const userAddress = TEST_USERS[i];
+          console.log(`\nProcessing user ${i + 1}/${TEST_USERS.length}: ${userAddress}`);
+
+          // Get balances before operations
+          const usdcBalanceBefore = await testUsdcContract.balanceOf(userAddress);
+          const ethBalanceBefore = await provider.getBalance(userAddress);
+
+          console.log(`USDC balance before: ${ethers.formatUnits(usdcBalanceBefore, 6)} USDC`);
+          console.log(`ETH balance before: ${ethers.formatEther(ethBalanceBefore)} ETH`);
+
+          // Send ETH transaction
+          // const ethTx = await signer.sendTransaction({
+          //   to: userAddress,
+          //   value: ethers.parseEther(ethAmountPerUser),
+          // });
+          // await ethTx.wait();
+          // console.log(`Sent ${ethAmountPerUser} ETH to ${userAddress}`);
+
+          // Mint USDC tokens
+          const mintTx = await testUsdcContract.mint(userAddress, ethers.parseUnits(usdcAmountPerUser, 6));
+          await mintTx.wait();
+          console.log(`Minted ${usdcAmountPerUser} USDC to ${userAddress}`);
+
+          // Get balances after operations
+          const usdcBalanceAfter = await testUsdcContract.balanceOf(userAddress);
+          const ethBalanceAfter = await provider.getBalance(userAddress);
+
+          console.log(`USDC balance after: ${ethers.formatUnits(usdcBalanceAfter, 6)} USDC`);
+          console.log(`ETH balance after: ${ethers.formatEther(ethBalanceAfter)} ETH`);
+        }
+
+        console.log("\nSuccessfully funded all test users!");
+      } catch (error: any) {
+        console.error("Operation failed:", error.message || String(error));
+        console.log("Note: This function only works if the USDC contract is a testnet version with a mint function");
+        console.log("and if your account has minting privileges.");
+      }
+      break;
+
+    case "buyTicketsForAllUsers":
+      if (args.length < 1) {
+        console.log("Usage: buyTicketsForAllUsers <amount>");
+        break;
+      }
+
+      const ticketAmount = args[0];
+      console.log(`Buying ${ticketAmount} USDC worth of tickets for all test users...`);
+
+      // Create USDC contract instance
+      // const ticketUsdcContract = new ethers.Contract(
+      //   "0x20679F4196f17a56711AD8b04776393e8F2499Ad",
+      //   [
+      //     "function approve(address spender, uint256 amount) external returns (bool)",
+      //     "function allowance(address owner, address spender) external view returns (uint256)",
+      //   ],
+      //   signer,
+      // );
+
+      // Check if purchasing is allowed
+      const isPurchasingAllowed = await jackpot.allowPurchasing();
+      if (!isPurchasingAllowed) {
+        console.log("Ticket purchasing is currently not allowed. Please enable purchasing first.");
+        break;
+      }
+
+      // Check if jackpot is running
+      const isJackpotRunningForTickets = await jackpot.jackpotLock();
+      if (isJackpotRunningForTickets) {
+        console.log("Cannot buy tickets while jackpot is running. Please try again later.");
+        break;
+      }
+
+      try {
+        // Buy tickets for each test user using their private key
+        for (let i = 0; i < TEST_USERS.length; i++) {
+          const userAddress = TEST_USERS[i];
+          const userPrivateKey = TEST_USER_PRIVATE_KEYS[i];
+
+          console.log(`\nProcessing user ${i + 1}/${TEST_USERS.length}: ${userAddress}`);
+
+          // Create user wallet and contracts
+          const userWallet = new ethers.Wallet(userPrivateKey, provider);
+          const userJackpot = new ethers.Contract(CONTRACT_ADDRESS, BaseJackpotABI.abi, userWallet);
+          const userUsdcContract = new ethers.Contract(
+            "0x20679F4196f17a56711AD8b04776393e8F2499Ad",
+            [
+              "function approve(address spender, uint256 amount) external returns (bool)",
+              "function allowance(address owner, address spender) external view returns (uint256)",
+              "function balanceOf(address account) external view returns (uint256)",
+            ],
+            userWallet,
+          );
+
+          // Get user's USDC balance
+          const userUsdcBalance = await userUsdcContract.balanceOf(userAddress);
+          console.log(`USDC balance: ${ethers.formatUnits(userUsdcBalance, 6)} USDC`);
+
+          if (userUsdcBalance < ethers.parseUnits(ticketAmount, 6)) {
+            console.log(`Insufficient USDC balance. Skipping user.`);
+            continue;
+          }
+
+          // Check current allowance
+          const userAllowance = await userUsdcContract.allowance(userAddress, CONTRACT_ADDRESS);
+          console.log(`Current allowance for jackpot contract: ${ethers.formatUnits(userAllowance, 6)} USDC`);
+
+          // Approve jackpot contract to spend tokens if needed
+          if (userAllowance < ethers.parseUnits(ticketAmount, 6)) {
+            console.log(`Approving ${ticketAmount} USDC for jackpot contract...`);
+            const approveTx = await userUsdcContract.approve(CONTRACT_ADDRESS, ethers.parseUnits(ticketAmount, 6));
+            await approveTx.wait();
+            console.log(`Approval transaction successful`);
+          } else {
+            console.log("Sufficient allowance already exists, skipping approval step.");
+          }
+
+          // Choose a referrer (use the next user in the list, or the first user if this is the last one)
+          const referrerIndex = (i + 1) % TEST_USERS.length;
+          const referrerAddress = TEST_USERS[referrerIndex];
+
+          // Buy tickets
+          console.log(`Buying tickets with ${ticketAmount} USDC with referrer ${referrerAddress}...`);
+          const buyTx = await userJackpot.purchaseTickets(
+            referrerAddress,
+            ethers.parseUnits(ticketAmount, 6),
+            userAddress,
+          );
+          await buyTx.wait();
+          console.log(`Successfully purchased tickets for ${userAddress}`);
+        }
+
+        console.log("\nSuccessfully bought tickets for all eligible test users!");
+      } catch (error: any) {
+        console.error("Operation failed:", error.message || String(error));
+      }
+      break;
+
+    case "viewJackpotParticipants":
+      console.log("Retrieving jackpot participants and winner information...");
+
+      try {
+        // Get winner information
+        const [lastWinner, lastJackpotTime, jackpotRunning, userPoolTotal, lpPoolTotal, ticketPrice] =
+          await Promise.all([
+            jackpot.lastWinnerAddress(),
+            jackpot.lastJackpotEndTime(),
+            jackpot.jackpotLock(),
+            jackpot.userPoolTotal(),
+            jackpot.lpPoolTotal(),
+            jackpot.ticketPrice(),
+          ]);
+
+        console.log("\n=== Winner Information ===");
+        console.log(
+          `Last Winner: ${lastWinner === "0x0000000000000000000000000000000000000000" ? "None" : lastWinner}`,
+        );
+        console.log(`Last Jackpot Time: ${new Date(Number(lastJackpotTime) * 1000).toLocaleString()}`);
+        console.log(`Jackpot Currently Running: ${jackpotRunning ? "Yes" : "No"}`);
+
+        // Get active LP addresses
+        const activeLpCount = await jackpot.activeLpAddresses.length;
+        console.log(`\nActive LPs: ${activeLpCount}`);
+
+        // Try to get information about LPs
+        try {
+          console.log("\n=== Active Liquidity Providers ===");
+          let lpIndex = 0;
+          let foundLPs = 0;
+
+          // Try to iterate through LPs (we'll try up to 20 addresses)
+          while (foundLPs < 20) {
+            try {
+              const lpAddress = await jackpot.activeLpAddresses(lpIndex);
+              if (lpAddress === "0x0000000000000000000000000000000000000000") {
+                break;
+              }
+
+              const lpInfo = await jackpot.lpsInfo(lpAddress);
+              if (lpInfo.active) {
+                foundLPs++;
+                console.log(`\nLP ${foundLPs}: ${lpAddress}`);
+                console.log(`- Principal: ${ethers.formatUnits(lpInfo.principal, 6)} USDC`);
+                console.log(`- Risk Percentage: ${lpInfo.riskPercentage}%`);
+              }
+
+              lpIndex++;
+            } catch (error: any) {
+              console.log("Error getting LP information:", error.message);
+              // We've reached the end of the LP list or encountered an error
+              break;
+            }
+          }
+
+          if (foundLPs === 0) {
+            console.log("No active liquidity providers found.");
+          }
+        } catch (error: any) {
+          console.log("Could not retrieve LP information:", error.message);
+        }
+
+        // Get information about all test users
+        console.log("\n=== Test Users Information ===");
+
+        // Try to get information for all test users
+        for (let i = 0; i < TEST_USERS.length; i++) {
+          const userAddress = TEST_USERS[i];
+          try {
+            console.log(`\nUser ${i + 1}: ${userAddress}`);
+
+            const userStruct = await jackpot.usersInfo(userAddress);
+
+            // Access the struct properties based on their array indices
+            // Based on the contract, the User struct has these properties:
+            // [0]: ticketsPurchasedTotalBps (uint256) - Total tickets purchased by the user for current jackpot
+            // [1]: winningsClaimable (uint256) - Tracks the total win amount in token
+            // [2]: active (bool) - Whether or not the user is participating in the current jackpot
+
+            if (userStruct && userStruct.length >= 3) {
+              // Calculate tickets purchased (divide by 10000 since it's stored as basis points)
+              const ticketsPurchased = Number(userStruct[0]) / 10000;
+
+              console.log(`- Tickets Purchased: ${ticketsPurchased}`);
+              console.log(`- Winnings Claimable: ${ethers.formatUnits(userStruct[1], 6)} USDC`);
+              console.log(`- Active: ${userStruct[2] ? "Yes" : "No"}`);
+            }
+          } catch (error: any) {
+            console.log(`Could not retrieve information for user ${userAddress}: ${error.message}`);
+          }
+        }
+
+        console.log("\n=== Pool Information ===");
+        console.log(`User Pool Total: ${ethers.formatUnits(userPoolTotal, 6)} USDC`);
+        console.log(`LP Pool Total: ${ethers.formatUnits(lpPoolTotal, 6)} USDC`);
+        console.log(`Ticket Price: ${ethers.formatUnits(ticketPrice, 6)} USDC`);
+      } catch (error: any) {
+        console.error("Failed to retrieve jackpot information:", error.message || String(error));
+      }
+      break;
+
     default:
       console.log("Unknown command. Available commands:");
       console.log("buyTicket <value> <referrer>");
@@ -404,6 +814,10 @@ async function main() {
       console.log("setTicketPrice <price>");
       console.log("getOwner");
       console.log("initializeContract <entropyAddress> <tokenAddress> <ticketPrice>");
+      console.log("mintUSDC <recipient> <amount>");
+      console.log("fundTestUsers");
+      console.log("buyTicketsForAllUsers <amount>");
+      console.log("viewJackpotParticipants");
   }
 }
 
