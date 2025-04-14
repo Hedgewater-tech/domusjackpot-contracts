@@ -540,7 +540,7 @@ async function main() {
     case "fundTestUsers":
       console.log("Funding all test users with 0.01 ETH and 10,000 USDC each...");
 
-      // const ethAmountPerUser = "0";
+      const ethAmountPerUser = "0";
       const usdcAmountPerUser = "10000000000000000000000";
       const testUsdcAddress = "0x20679F4196f17a56711AD8b04776393e8F2499Ad";
 
@@ -568,12 +568,12 @@ async function main() {
           console.log(`ETH balance before: ${ethers.formatEther(ethBalanceBefore)} ETH`);
 
           // Send ETH transaction
-          // const ethTx = await signer.sendTransaction({
-          //   to: userAddress,
-          //   value: ethers.parseEther(ethAmountPerUser),
-          // });
-          // await ethTx.wait();
-          // console.log(`Sent ${ethAmountPerUser} ETH to ${userAddress}`);
+          const ethTx = await signer.sendTransaction({
+            to: userAddress,
+            value: ethers.parseEther(ethAmountPerUser),
+          });
+          await ethTx.wait();
+          console.log(`Sent ${ethAmountPerUser} ETH to ${userAddress}`);
 
           // Mint USDC tokens
           const mintTx = await testUsdcContract.mint(userAddress, ethers.parseUnits(usdcAmountPerUser, 6));
@@ -796,6 +796,96 @@ async function main() {
       }
       break;
 
+    case "claimWinnings":
+      if (args.length < 1) {
+        console.log("Usage: claimWinnings <userNumber>");
+        break;
+      }
+
+      const claimUserNumber = parseInt(args[0]);
+
+      if (isNaN(claimUserNumber) || claimUserNumber < 1 || claimUserNumber > TEST_USERS.length) {
+        console.log(`Invalid user number. Please provide a number between 1 and ${TEST_USERS.length}`);
+        break;
+      }
+
+      const claimUserAddress = TEST_USERS[claimUserNumber - 1];
+      console.log(`Claiming winnings for User ${claimUserNumber}: ${claimUserAddress}`);
+
+      try {
+        // First, check if the user has any winnings to claim
+        const userInfo = await jackpot.usersInfo(claimUserAddress);
+        const winningsClaimable = userInfo[1]; // Index 1 is winningsClaimable based on the contract
+
+        console.log(`Winnings available to claim: ${ethers.formatUnits(winningsClaimable, 6)} USDC`);
+
+        if (winningsClaimable <= 0) {
+          console.log("No winnings available to claim for this user.");
+          break;
+        }
+
+        // Check user's ETH balance
+        const userEthBalance = await provider.getBalance(claimUserAddress);
+        console.log(`User ETH balance: ${ethers.formatEther(userEthBalance)} ETH`);
+
+        // Fund the user with ETH if needed for gas
+        if (userEthBalance < ethers.parseEther("0.01")) {
+          console.log("User needs ETH for gas. Sending 0.01 ETH...");
+          const fundTx = await signer.sendTransaction({
+            to: claimUserAddress,
+            value: ethers.parseEther("0.01"),
+          });
+          await fundTx.wait();
+          console.log(`Funded user with 0.01 ETH. Transaction: ${fundTx.hash}`);
+
+          // Verify new balance
+          const newBalance = await provider.getBalance(claimUserAddress);
+          console.log(`New ETH balance: ${ethers.formatEther(newBalance)} ETH`);
+        }
+
+        // Create a wallet for the specific test user
+        const userWallet = new ethers.Wallet(TEST_USER_PRIVATE_KEYS[claimUserNumber - 1], provider);
+
+        // Create a contract instance connected to the user's wallet
+        const userJackpot = new ethers.Contract(
+          CONTRACT_ADDRESS,
+          [
+            "function withdrawWinnings() public",
+            "function usersInfo(address) public view returns (uint256, uint256, bool)",
+          ],
+          userWallet,
+        );
+
+        console.log("Sending transaction to withdraw winnings...");
+        const tx = await userJackpot.withdrawWinnings();
+        console.log(`Transaction sent: ${tx.hash}`);
+
+        const receipt = await tx.wait();
+        console.log(`Winnings claimed successfully in block ${receipt.blockNumber}`);
+
+        // Check the user's winnings after withdrawal
+        const userInfoAfter = await jackpot.usersInfo(claimUserAddress);
+        const winningsAfter = userInfoAfter[1];
+
+        console.log(`Winnings remaining after claim: ${ethers.formatUnits(winningsAfter, 6)} USDC`);
+        console.log(
+          `Successfully claimed ${ethers.formatUnits(winningsClaimable, 6)} USDC for User ${claimUserNumber}`,
+        );
+
+        // Check the user's USDC balance after claiming
+        const usdcContract = new ethers.Contract(
+          "0x20679F4196f17a56711AD8b04776393e8F2499Ad", // USDC token address
+          ["function balanceOf(address) external view returns (uint256)"],
+          provider,
+        );
+
+        const usdcBalance = await usdcContract.balanceOf(claimUserAddress);
+        console.log(`User USDC balance after claiming: ${ethers.formatUnits(usdcBalance, 6)} USDC`);
+      } catch (error: any) {
+        console.error("Failed to claim winnings:", error.message || String(error));
+      }
+      break;
+
     default:
       console.log("Unknown command. Available commands:");
       console.log("buyTicket <value> <referrer>");
@@ -818,6 +908,7 @@ async function main() {
       console.log("fundTestUsers");
       console.log("buyTicketsForAllUsers <amount>");
       console.log("viewJackpotParticipants");
+      console.log("claimWinnings <userNumber>");
   }
 }
 
