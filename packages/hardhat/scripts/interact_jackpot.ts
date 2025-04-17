@@ -10,7 +10,7 @@ dotenv.config({ path: path.resolve(__dirname, "../.env") });
 
 // Configuration
 const RPC_URL = "https://arb-sepolia.g.alchemy.com/v2/2Q9eoOjO011kr5tnMrZxonEo1Lqasted";
-const CONTRACT_ADDRESS = "0x5C08d963d77E3813d5CCe69B89edAA8c88Fe601a";
+const CONTRACT_ADDRESS = "0x07C382db481Cd067A77748e10Cf6D9ab188e9b3d";
 // Use the private key from .env or fallback to the hardcoded one for testing
 const PRIVATE_KEY = process.env.PRIVATE_KEY;
 
@@ -356,6 +356,66 @@ async function main() {
       console.log(`- Active: ${lpInfo.active}`);
       break;
 
+    case "checkLPPosition":
+      const checkAddress = args[0] || signer.address;
+      console.log(`Checking LP position for address: ${checkAddress}`);
+
+      try {
+        // Get LP info for the address
+        const lpPosition = await jackpot.lpsInfo(checkAddress);
+
+        // Get LP pool total for calculating percentage share
+        const totalLpPool = await jackpot.lpPoolTotal();
+
+        // Calculate share percentage if the pool has funds
+        const sharePercentage =
+          totalLpPool > 0 ? ((Number(lpPosition.stake) / Number(totalLpPool)) * 100).toFixed(4) : "0.0000";
+
+        // Get additional contract information
+        const [jackpotLockStatus, minLpDeposit] = await Promise.all([jackpot.jackpotLock(), jackpot.minLpDeposit()]);
+
+        // Format all values for display
+        const principal = ethers.formatUnits(lpPosition.principal, 6);
+        const stake = ethers.formatUnits(lpPosition.stake, 6);
+        const riskPercentage = lpPosition.riskPercentage;
+        const isActive = lpPosition.active;
+
+        // Display comprehensive LP position information
+        console.log("\n=== LP Position Details ===");
+        console.log(`Address: ${checkAddress}`);
+        console.log(`Status: ${isActive ? "Active" : "Inactive"}`);
+        console.log(`Principal Amount: ${principal} USDC`);
+        console.log(`Current Stake: ${stake} USDC`);
+        console.log(`Risk Percentage: ${riskPercentage}%`);
+        console.log(`Share of LP Pool: ${sharePercentage}%`);
+
+        // Show potential rewards based on risk percentage
+        console.log("\n=== Risk/Reward Analysis ===");
+        console.log(`Potential Reward Percentage: ${100 - Number(riskPercentage)}%`);
+        console.log(`Capital at Risk: ${((Number(stake) * Number(riskPercentage)) / 100).toFixed(6)} USDC`);
+
+        // Show deposit status
+        console.log("\n=== Deposit Status ===");
+        if (Number(lpPosition.principal) < Number(minLpDeposit)) {
+          console.log(`Warning: Deposit is below minimum requirement of ${ethers.formatUnits(minLpDeposit, 6)} USDC`);
+        }
+        console.log(
+          `Jackpot Currently Running: ${jackpotLockStatus ? "Yes (cannot modify position)" : "No (can modify position)"}`,
+        );
+
+        // Provide helpful actions
+        console.log("\n=== Available Actions ===");
+        if (isActive) {
+          console.log("- Withdraw LP: Use 'withdrawAllLP' command");
+          console.log("- Adjust Risk: Use 'lpAdjustRiskPercentage' command");
+        } else {
+          console.log("- Deposit LP: Use 'depositLP' command");
+        }
+      } catch (error: any) {
+        console.error("Failed to check LP position:", error.message || String(error));
+      }
+      break;
+
     case "getUserInfo":
       const userAddress = args[0] || signer.address;
       const userInfo = await jackpot.usersInfo(userAddress);
@@ -487,7 +547,7 @@ async function main() {
       }
 
       const mintAmount = ethers.parseUnits("5000000", 18);
-      const ethAmount = ethers.parseEther("0.01");
+      const ethAmount = "0.01";
       const [recipient] = args;
       const usdcAddress = "0x20679F4196f17a56711AD8b04776393e8F2499Ad";
 
@@ -512,12 +572,12 @@ async function main() {
         console.log(`ETH balance before: ${ethers.formatEther(ethBalanceBefore)} ETH`);
 
         // Send ETH transaction
-        // const ethTx = await signer.sendTransaction({
-        //   to: recipient,
-        //   value: ethers.parseEther(ethAmount),
-        // });
-        // await ethTx.wait();
-        // console.log(`Successfully sent ${ethAmount} ETH to ${recipient}`);
+        const ethTx = await signer.sendTransaction({
+          to: recipient,
+          value: ethers.parseEther(ethAmount.toString()),
+        });
+        await ethTx.wait();
+        console.log(`Successfully sent ${ethAmount} ETH to ${recipient}`);
 
         // Mint USDC tokens
         const mintTx = await usdcContract.mint(recipient, ethers.parseUnits(mintAmount.toString(), 6));
@@ -775,10 +835,30 @@ async function main() {
             // [2]: active (bool) - Whether or not the user is participating in the current jackpot
 
             if (userStruct && userStruct.length >= 3) {
-              // Calculate tickets purchased (divide by 10000 since it's stored as basis points)
-              const ticketsPurchased = Number(userStruct[0]) / 10000;
+              // Calculate actual tickets purchased
+              // In the contract: ticketsPurchasedBps = ticketCount * (10000 - feeBps)
+              // To get actual tickets, we need to divide by (10000 - feeBps), but since we don't know feeBps,
+              // we'll estimate it based on the contract's typical fee structure
 
-              console.log(`- Tickets Purchased: ${ticketsPurchased}`);
+              // Get the fee percentage from the contract (default to 10% if not available)
+              let feeBps = 1000; // Default 10% fee
+              try {
+                feeBps = await jackpot.feeBps();
+              } catch (error) {
+                console.log("Could not retrieve fee percentage, using default 10%", error);
+              }
+
+              const ticketsPurchasedBps = Number(userStruct[0]);
+
+              // Calculate actual tickets based on the formula: ticketsPurchasedBps = ticketCount * (10000 - feeBps)
+              const actualTickets = Math.round(ticketsPurchasedBps / (10000 - Number(feeBps)));
+
+              // Calculate ticket purchase amount in USDC
+              const ticketPrice = await jackpot.ticketPrice();
+              const ticketPurchaseAmount = actualTickets * Number(ethers.formatUnits(ticketPrice, 6));
+
+              console.log(`- Tickets Purchased: ${actualTickets} (${ticketPurchaseAmount} USDC)`);
+              console.log(`- Tickets Weight in Pool: ${(ticketsPurchasedBps / 10000).toFixed(2)} basis points`);
               console.log(`- Winnings Claimable: ${ethers.formatUnits(userStruct[1], 6)} USDC`);
               console.log(`- Active: ${userStruct[2] ? "Yes" : "No"}`);
             }
@@ -909,6 +989,7 @@ async function main() {
       console.log("buyTicketsForAllUsers <amount>");
       console.log("viewJackpotParticipants");
       console.log("claimWinnings <userNumber>");
+      console.log("checkLPPosition <address>");
   }
 }
 

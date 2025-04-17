@@ -914,11 +914,11 @@ Change License: GNU General Public License v2.0 or later
 
         // Configure jackpot
         ticketPrice = _ticketPrice * (10 ** tokenDecimals);
-        feeBps = 1500; // 15%
-        referralFeeBps = 500; // 5%
+        feeBps = 3000; // 30%
+        referralFeeBps = 1000; // 10%
         roundDurationInSeconds = 86400; // 1 day
         fallbackWinner = _initialOwnerAddress;
-        lpLimit = 100; // 100 LPs
+        lpLimit = 200; // 200 LPs
         userLimit = 1500; // 1500 users
         allowPurchasing = false;
         lastJackpotEndTime = block.timestamp;

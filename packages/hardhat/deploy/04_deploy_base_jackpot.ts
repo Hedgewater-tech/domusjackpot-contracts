@@ -7,7 +7,7 @@ import { DeployFunction } from "hardhat-deploy/types";
  * @param hre HardhatRuntimeEnvironment object.
  */
 const deployBaseJackpot: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
-  const { deployments, getNamedAccounts, ethers, upgrades } = hre;
+  const { getNamedAccounts, ethers, upgrades, deployments } = hre;
   const { deploy } = deployments;
   const { deployer } = await getNamedAccounts();
 
@@ -16,6 +16,8 @@ const deployBaseJackpot: DeployFunction = async function (hre: HardhatRuntimeEnv
   // Get configuration from environment variables
   const entropyAddress = "0x549Ebba8036Ab746611B4fFA1423eb0A4Df61440"; //process.env.ENTROPY_ADDRESS;
   const initialOwnerAddress = process.env.INITIAL_OWNER_ADDRESS || deployer;
+
+  // 0x02c6a2fA58cC01A18B8D9E00eA48d65E4dF26c70  FeUSD hyperliquid mainnet
   const tokenAddress = "0x20679F4196f17a56711AD8b04776393e8F2499Ad"; //process.env.TOKEN_ADDRESS;
   const ticketPrice = process.env.TICKET_PRICE || "1"; // Default to 1 if not specified
 
@@ -28,18 +30,17 @@ const deployBaseJackpot: DeployFunction = async function (hre: HardhatRuntimeEnv
   console.log(`Using Token address: ${tokenAddress}`);
   console.log(`Using Ticket Price: ${ticketPrice}`);
 
-  // // Deploy the implementation contract
-  // console.log("Deploying BaseJackpot implementation...");
-  // const baseJackpotImpl = await deploy("BaseJackpot", {
-  //   from: deployer,
-  //   args: [], // No constructor arguments
-  //   log: true,
-  // });
-
-  // console.log(`BaseJackpot implementation deployed at: ${baseJackpotImpl.address}`);
+  // Deploy the implementation contract
+  // this is done to generate deployment log for verification purpose
+  await deploy("BaseJackpot", {
+    from: deployer,
+    args: [], // No constructor arguments
+    log: true,
+  });
 
   // Deploy the proxy contract
   console.log("Deploying ERC1967Proxy...");
+
   const BaseJackpotFactory = await ethers.getContractFactory("BaseJackpot", {
     signer: await ethers.getSigner(deployer),
   });
