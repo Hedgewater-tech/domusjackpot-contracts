@@ -30,7 +30,7 @@ on:
           - ethereum
 
 jobs:
-  check-and-run-jackpot:
+  run-jackpot:
     runs-on: ubuntu-latest
 
     steps:
@@ -53,86 +53,7 @@ jobs:
           cd packages/hardhat
           npx hardhat compile
 
-      - name: Check jackpot eligibility
-        id: check-eligibility
-        env:
-          PRIVATE_KEY: ${{ secrets.JACKPOT_PRIVATE_KEY }}
-          ALCHEMY_API_KEY: ${{ secrets.ALCHEMY_API_KEY }}
-          NETWORK: ${{ github.event.inputs.network || 'arbitrum-sepolia' }}
-        run: |
-          cd packages/hardhat
-          # Create a script to check if jackpot can be run
-          cat > check-jackpot.ts << 'EOF'
-          import { ethers } from "ethers";
-          import * as dotenv from "dotenv";
-          dotenv.config();
-
-          async function checkJackpot() {
-            try {
-              const CONTRACT_ADDRESS = "0x5C08d963d77E3813d5CCe69B89edAA8c88Fe601a";
-              const PRIVATE_KEY = process.env.PRIVATE_KEY || "";
-              const ALCHEMY_API_KEY = process.env.ALCHEMY_API_KEY || "";
-              const NETWORK = process.env.NETWORK || "arbitrum-sepolia";
-              
-              let rpcUrl = "";
-              if (NETWORK === "arbitrum-sepolia") {
-                rpcUrl = `https://arb-sepolia.g.alchemy.com/v2/${ALCHEMY_API_KEY}`;
-              } else if (NETWORK === "arbitrum-one") {
-                rpcUrl = `https://arb-mainnet.g.alchemy.com/v2/${ALCHEMY_API_KEY}`;
-              } else if (NETWORK === "ethereum") {
-                rpcUrl = `https://eth-mainnet.g.alchemy.com/v2/${ALCHEMY_API_KEY}`;
-              }
-              
-              const provider = new ethers.JsonRpcProvider(rpcUrl);
-              const wallet = new ethers.Wallet(PRIVATE_KEY, provider);
-              
-              const jackpotABI = [
-                "function lastJackpotEndTime() public view returns (uint256)",
-                "function roundDurationInSeconds() public view returns (uint256)",
-                "function jackpotLock() public view returns (bool)"
-              ];
-              
-              const jackpot = new ethers.Contract(CONTRACT_ADDRESS, jackpotABI, wallet);
-              
-              const [lastJackpotEndTime, roundDuration, jackpotLock, currentTime] = await Promise.all([
-                jackpot.lastJackpotEndTime(),
-                jackpot.roundDurationInSeconds(),
-                jackpot.jackpotLock(),
-                provider.getBlock("latest").then(block => block?.timestamp || 0),
-              ]);
-              
-              const nextJackpotTime = Number(lastJackpotEndTime) + Number(roundDuration);
-              const timeRemaining = nextJackpotTime - currentTime;
-              
-              console.log(`Last jackpot time: ${new Date(Number(lastJackpotEndTime) * 1000).toISOString()}`);
-              console.log(`Next jackpot available: ${new Date(nextJackpotTime * 1000).toISOString()}`);
-              console.log(`Current time: ${new Date(currentTime * 1000).toISOString()}`);
-              console.log(`Time remaining: ${timeRemaining / 60} minutes`);
-              console.log(`Jackpot currently running: ${jackpotLock}`);
-              
-              // Set GitHub output variables
-              console.log(`::set-output name=can_run::${currentTime >= nextJackpotTime && !jackpotLock}`);
-              console.log(`::set-output name=next_time::${nextJackpotTime}`);
-              console.log(`::set-output name=time_remaining::${timeRemaining}`);
-            } catch (error) {
-              console.error("Error checking jackpot:", error);
-              process.exit(1);
-            }
-          }
-
-          checkJackpot().catch(console.error);
-          EOF
-
-          # Run the check script
-          npx ts-node check-jackpot.ts
-
-          # For GitHub Actions newer syntax
-          echo "can_run=$(npx ts-node check-jackpot.ts | grep '::set-output name=can_run::' | cut -d':' -f4-)" >> $GITHUB_OUTPUT
-          echo "next_time=$(npx ts-node check-jackpot.ts | grep '::set-output name=next_time::' | cut -d':' -f4-)" >> $GITHUB_OUTPUT
-          echo "time_remaining=$(npx ts-node check-jackpot.ts | grep '::set-output name=time_remaining::' | cut -d':' -f4-)" >> $GITHUB_OUTPUT
-
-      - name: Run jackpot if eligible
-        if: ${{ steps.check-eligibility.outputs.can_run == 'true' || github.event_name == 'workflow_dispatch' }}
+      - name: Run jackpot
         env:
           PRIVATE_KEY: ${{ secrets.JACKPOT_PRIVATE_KEY }}
           ALCHEMY_API_KEY: ${{ secrets.ALCHEMY_API_KEY }}
@@ -144,10 +65,4 @@ jobs:
       - name: Report status
         if: always()
         run: |
-          echo "Jackpot check completed at $(date)"
-          if [[ "${{ steps.check-eligibility.outputs.can_run }}" == "true" ]]; then
-            echo "Jackpot was eligible to run and execution was attempted"
-          else
-            echo "Jackpot was not eligible to run. Next eligible time: $(date -d @${{ steps.check-eligibility.outputs.next_time }})"
-            echo "Time remaining: ${{ steps.check-eligibility.outputs.time_remaining }} seconds"
-          fi
+          echo "Jackpot execution attempt completed at $(date)"

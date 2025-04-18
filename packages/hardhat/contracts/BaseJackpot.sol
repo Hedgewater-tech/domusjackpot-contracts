@@ -168,7 +168,7 @@ contract BaseJackpot is
      *                          *
      ****************************/
 
-    // Set the ticket price in Szabo (6 decimals)
+    // Set the ticket price in token (6 decimals)
     function setTicketPrice(uint256 _newTicketPrice) external onlyOwner {
         ticketPrice = _newTicketPrice;
     }
@@ -199,7 +199,7 @@ contract BaseJackpot is
         feeBps = _feeBps;
     }
 
-    // Set the cap for LP pool/stake in Szabo (6 decimals)
+    // Set the cap for LP pool/stake in token (6 decimals)
     function setLpPoolCap(uint256 _cap) external onlyOwner {
         lpPoolCap = _cap;
     }
@@ -239,7 +239,7 @@ contract BaseJackpot is
         userLimit = _userLimit;
     }
 
-    // Set the minimum LP deposit in Szabo (6 decimals)
+    // Set the minimum LP deposit in token (6 decimals)
     function setMinLpDeposit(uint256 _minDeposit) external onlyOwner {
         minLpDeposit = _minDeposit;
     }
@@ -295,25 +295,15 @@ contract BaseJackpot is
     }
 
 
-/* This builds upon a MIT-licensed contract by the PEVL hackathon team, led by Patrick Lung, deployed on testnet at 0x0278a964dC3275274bD845B936cE2e0b09c8B827
-The contract was modified significantly by Patrick Lung and other collaborators, and last deployed with MIT license at 0xf9d524576646d718e4f5f5bade17082d9ecf25d0
-Any changes not in the above MIT-licensed contracts are under BUSL-1.1.
-
-Business Source License 1.1
-
-License text copyright (c) 2017 MariaDB Corporation Ab, All Rights Reserved.
-"Business Source License" is a trademark of MariaDB Corporation Ab.
-
+/* 
 -----------------------------------------------------------------------------
 
 Parameters
 
 Licensor:             Coordination Inc.
 
-Licensed Work:        Megapot Jackpot (BaseJackpot.sol)
+Licensed Work:        Domus App (BaseJackpot.sol)
                       The Licensed Work is (c) 2025 Coordination Inc.
-
-Change Date: 2028-05-27
 
 Change License: GNU General Public License v2.0 or later
 */
