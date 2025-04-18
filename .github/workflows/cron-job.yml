@@ -2,8 +2,8 @@ name: Jackpot Automation
 
 on:
   schedule:
-    # Run every 5 minutes to check if jackpot can be executed
-    - cron: "*/5 * * * *"
+    # Run every 10 minutes to check if jackpot can be executed
+    - cron: "*/10 * * * *"
   workflow_dispatch:
     # Allow manual triggering with options
     inputs:
