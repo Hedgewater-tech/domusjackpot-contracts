@@ -9,8 +9,8 @@ import * as path from "path";
 dotenv.config({ path: path.resolve(__dirname, "../.env") });
 
 // Configuration
-const RPC_URL = "https://arb-sepolia.g.alchemy.com/v2/2Q9eoOjO011kr5tnMrZxonEo1Lqasted";
-const CONTRACT_ADDRESS = "0x07C382db481Cd067A77748e10Cf6D9ab188e9b3d";
+const RPC_URL = "https://rpc.hyperliquid.xyz/evm";
+const CONTRACT_ADDRESS = "0x7d4d84152aAcEAE2c5347A13d652e83528caa586";
 // Use the private key from .env or fallback to the hardcoded one for testing
 const PRIVATE_KEY = process.env.PRIVATE_KEY;
 
@@ -247,13 +247,16 @@ async function main() {
           break;
         }
 
+        console.log("wallet address: ", signer.address);
+        console.log("wallet balance: ", await provider.getBalance(signer.address));
+
         // Generate a random number for entropy
         const randomBytes = ethers.randomBytes(32);
         const userRandomNumber = ethers.hexlify(randomBytes);
         console.log(`Using random number: ${userRandomNumber}`);
 
         // Send transaction with ETH value for entropy fee (0.01 ETH as a safe default)
-        const entropyFee = ethers.parseEther("0.01");
+        const entropyFee = ethers.parseEther("0.02");
         console.log(`Using entropy fee: ${ethers.formatEther(entropyFee)} ETH`);
 
         const tx = await jackpot.runJackpot(userRandomNumber, { value: entropyFee });
@@ -479,6 +482,30 @@ async function main() {
         console.log(`New LP pool cap: ${ethers.formatUnits(newLpPoolCap, 6)} USDC`);
       } catch (error: any) {
         console.error("Failed to set ticket price:", error.message || String(error));
+      }
+      break;
+
+    case "setRoundDuration":
+      if (args.length < 1) {
+        console.log("Usage: setRoundDuration <durationInSeconds>");
+        console.log("Examples: setRoundDuration 86400 (1 day)");
+        console.log("          setRoundDuration 3600 (1 hour)");
+        console.log("          setRoundDuration 600 (10 minutes)");
+        break;
+      }
+      const newDuration = args[0];
+      try {
+        const tx = await jackpot.setRoundDurationInSeconds(newDuration);
+        await tx.wait();
+        console.log(
+          `Successfully set round duration to ${newDuration} seconds (${Number(newDuration) / 60 / 60} hours)`,
+        );
+
+        // Get and display the current round duration
+        const currentDuration = await jackpot.roundDurationInSeconds();
+        console.log(`Current round duration: ${currentDuration} seconds (${Number(currentDuration) / 60 / 60} hours)`);
+      } catch (error: any) {
+        console.error("Failed to set round duration:", error.message || String(error));
       }
       break;
 

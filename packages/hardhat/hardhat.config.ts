@@ -107,6 +107,8 @@ const config: HardhatUserConfig = {
       url: "https://rpc.hyperliquid-testnet.xyz/evm",
       chainId: 998,
       accounts: [deployerPrivateKey],
+      blockGasLimit: 30000000, // Add this line
+      timeout: 120000, // Add this line for longer timeout
     },
     arbitrum: {
       url: `https://arb-mainnet.g.alchemy.com/v2/${providerApiKey}`,

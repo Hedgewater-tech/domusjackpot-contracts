@@ -2,30 +2,15 @@
   "manifestVersion": "3.2",
   "proxies": [
     {
-      "address": "0x063FD94f585a14b9733c4ab7E1e8be3bDbe53221",
-      "txHash": "0xfd290c2a5dcff4e66b8638e97743fcfc90eaf5341b63c99f672aa702930b11f1",
-      "kind": "uups"
-    },
-    {
-      "address": "0x20561Da1977A86B2E576caFfE199CEd7a4Ec9990",
-      "txHash": "0x0bbc4bd74ad928a2a8e599346527ec0bf300c6bc38001c19af5bec9545149316",
-      "kind": "uups"
-    },
-    {
-      "address": "0x81797F311d66D60981c490004E95D3cE6670A131",
-      "txHash": "0x077bded9b332be908856a0a59a1809ff7c2614d53f1dc234dc4b876301ed90ac",
-      "kind": "uups"
-    },
-    {
-      "address": "0x07C382db481Cd067A77748e10Cf6D9ab188e9b3d",
-      "txHash": "0xbbc73a368c729c78d892c4b9ebedd552f838f8183c30c175861d5c2cdab85a05",
+      "address": "0x7d4d84152aAcEAE2c5347A13d652e83528caa586",
+      "txHash": "0xe2e42d1be3fd5b4f63da946fcde8a9e5d365b14506ce9b6a4d964af070e0ac99",
       "kind": "uups"
     }
   ],
   "impls": {
     "fbeb1d285e42fad33a960d8882442778210d06f595f3eb1481782c5b7f71de95": {
-      "address": "0x59edc43DAF73B9d19f7dbCa85F55E0aF231acD6e",
-      "txHash": "0x562733c077f51705daa1cb25e6340335601d3203808cc47b8f962b6b58b20a88",
+      "address": "0x20679F4196f17a56711AD8b04776393e8F2499Ad",
+      "txHash": "0x09ff855ff4b6982b5eaa7330467ecc333f38e474ba645f955ad11edb640965ff",
       "layout": {
         "solcVersion": "0.8.23",
         "storage": [
@@ -33,7 +18,7 @@
             "label": "entropy",
             "offset": 0,
             "slot": "0",
-            "type": "t_contract(IEntropy)10492",
+            "type": "t_contract(IEntropy)4670",
             "contract": "BaseJackpot",
             "src": "contracts/BaseJackpot.sol:23"
           },
@@ -49,7 +34,7 @@
             "label": "usersInfo",
             "offset": 0,
             "slot": "2",
-            "type": "t_mapping(t_address,t_struct(User)7012_storage)",
+            "type": "t_mapping(t_address,t_struct(User)2386_storage)",
             "contract": "BaseJackpot",
             "src": "contracts/BaseJackpot.sol:36"
           },
@@ -57,7 +42,7 @@
             "label": "lpsInfo",
             "offset": 0,
             "slot": "3",
-            "type": "t_mapping(t_address,t_struct(LP)6833_storage)",
+            "type": "t_mapping(t_address,t_struct(LP)2207_storage)",
             "contract": "BaseJackpot",
             "src": "contracts/BaseJackpot.sol:37"
           },
@@ -265,7 +250,7 @@
             "label": "token",
             "offset": 1,
             "slot": "26",
-            "type": "t_contract(IERC20)2374",
+            "type": "t_contract(IERC20)1316",
             "contract": "BaseJackpot",
             "src": "contracts/BaseJackpot.sol:96"
           },
@@ -357,19 +342,19 @@
             "label": "uint256[50]",
             "numberOfBytes": "1600"
           },
-          "t_contract(IERC20)2374": {
+          "t_contract(IERC20)1316": {
             "label": "contract IERC20",
             "numberOfBytes": "20"
           },
-          "t_contract(IEntropy)10492": {
+          "t_contract(IEntropy)4670": {
             "label": "contract IEntropy",
             "numberOfBytes": "20"
           },
-          "t_mapping(t_address,t_struct(LP)6833_storage)": {
+          "t_mapping(t_address,t_struct(LP)2207_storage)": {
             "label": "mapping(address => struct BaseJackpot.LP)",
             "numberOfBytes": "32"
           },
-          "t_mapping(t_address,t_struct(User)7012_storage)": {
+          "t_mapping(t_address,t_struct(User)2386_storage)": {
             "label": "mapping(address => struct BaseJackpot.User)",
             "numberOfBytes": "32"
           },
@@ -377,7 +362,7 @@
             "label": "mapping(address => uint256)",
             "numberOfBytes": "32"
           },
-          "t_struct(LP)6833_storage": {
+          "t_struct(LP)2207_storage": {
             "label": "struct BaseJackpot.LP",
             "members": [
               {
@@ -407,7 +392,7 @@
             ],
             "numberOfBytes": "128"
           },
-          "t_struct(User)7012_storage": {
+          "t_struct(User)2386_storage": {
             "label": "struct BaseJackpot.User",
             "members": [
               {
