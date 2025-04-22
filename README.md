@@ -66,7 +66,6 @@ Run smart contract test with `yarn hardhat:test`
 - Edit your frontend homepage at `packages/nextjs/app/page.tsx`. For guidance on [routing](https://nextjs.org/docs/app/building-your-application/routing/defining-routes) and configuring [pages/layouts](https://nextjs.org/docs/app/building-your-application/routing/pages-and-layouts) checkout the Next.js documentation.
 - Edit your deployment scripts in `packages/hardhat/deploy`
 
-
 ## Documentation
 
 Visit our [docs](https://docs.scaffoldeth.io) to learn how to start building with Scaffold-ETH 2.
@@ -97,7 +96,7 @@ The TokenPresale contract is a flexible and secure solution for conducting token
 - **Token Allocation**: Specify the total number of tokens allocated for the presale
 - **Token Distribution**: Users can withdraw tokens after the presale ends
 - **Fund Management**: Owner can withdraw funds after the presale ends
-- **Safety Features**: 
+- **Safety Features**:
   - Reentrancy protection
   - Owner-only administrative functions
   - ERC20 token recovery for accidental transfers
@@ -170,6 +169,7 @@ yarn hardhat:test test/TokenPresale.ts
 ```
 
 The tests cover all aspects of the contract, including:
+
 - Deployment and setup
 - Whitelisting functionality
 - Deposit mechanisms and restrictions
@@ -207,13 +207,14 @@ solidity: {
 }
 ```
 
-## 🎰 BaseJackpot Smart Contract
+## 🎰 DomusJackpot Smart Contract
 
-The BaseJackpot contract is a sophisticated jackpot system with liquidity provider (LP) functionality that allows users to participate in regular jackpot rounds.
+The DomusJackpot contract is a sophisticated jackpot system with liquidity provider (LP) functionality that allows users to participate in regular jackpot rounds.
 
 ### Operational Flow
 
 #### 1. Contract Initialization
+
 - The contract is initialized with key parameters:
   - Owner address
   - Entropy provider address (for randomness)
@@ -221,6 +222,7 @@ The BaseJackpot contract is a sophisticated jackpot system with liquidity provid
   - Ticket price
 
 #### 2. Round Preparation
+
 - LPs deposit tokens with a specified risk percentage
   - LPs provide liquidity to the jackpot pool
   - Risk percentage determines their exposure to potential losses
@@ -229,6 +231,7 @@ The BaseJackpot contract is a sophisticated jackpot system with liquidity provid
   - Referrals receive a percentage of the ticket price as a fee
 
 #### 3. Jackpot Execution
+
 - The jackpot can be executed once per round (default: 24 hours)
 - Execution requirements:
   - Current time must be ≥ lastJackpotEndTime + roundDurationInSeconds
@@ -243,12 +246,14 @@ The BaseJackpot contract is a sophisticated jackpot system with liquidity provid
   6. The jackpot is reset for the next round
 
 #### 4. Prize Distribution
+
 - The winner receives a portion of the jackpot pool
 - LP providers receive returns based on their risk percentage
 - Protocol fees are collected
 - Referral fees are distributed to referrers
 
 #### 5. Automation
+
 - The jackpot execution is automated through a GitHub Actions workflow
 - The workflow can be triggered:
   - Automatically on a daily schedule
@@ -258,16 +263,19 @@ The BaseJackpot contract is a sophisticated jackpot system with liquidity provid
 ### Key Functions
 
 #### For Users
+
 - `purchaseTickets`: Buy tickets for the current jackpot round
 - `getTicketPrice`: Get the current ticket price
 - `getUserInfo`: Get information about a user's tickets and winnings
 
 #### For Liquidity Providers
+
 - `lpDeposit`: Deposit tokens as a liquidity provider with a specified risk percentage
 - `lpWithdraw`: Withdraw LP tokens and accrued fees
 - `getLPInfo`: Get information about an LP's deposits and earnings
 
 #### For Jackpot Operations
+
 - `runJackpot`: Execute the jackpot process and select a winner
 - `getJackpotInfo`: Get comprehensive information about the current jackpot state
 - `getJackpotStatus`: Check if the jackpot is currently running and when the next round is available
@@ -276,16 +284,16 @@ The BaseJackpot contract is a sophisticated jackpot system with liquidity provid
 
 The project includes scripts and GitHub Actions workflows for automated jackpot operations:
 
-- `interact_jackpot.ts`: Script for interacting with the BaseJackpot contract
+- `interact_jackpot.ts`: Script for interacting with the DomusJackpot contract
   - Commands for purchasing tickets, depositing LP, and running the jackpot
   - Functions for retrieving jackpot information and status
-  
 - `cron-job.yml`: GitHub Actions workflow for automated jackpot execution
   - Scheduled daily execution
   - Manual triggering with configurable parameters
   - Network selection for different environments
 
 ### Security Considerations
+
 - The contract uses a trusted entropy source for randomness
 - Timelock mechanisms prevent premature jackpot executions
 - The jackpotLock prevents concurrent executions
