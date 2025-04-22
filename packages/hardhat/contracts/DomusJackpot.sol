@@ -11,7 +11,7 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
-contract BaseJackpot is
+contract DomusJackpot is
     Initializable,
     Ownable2StepUpgradeable,
     UUPSUpgradeable,
@@ -302,7 +302,7 @@ Parameters
 
 Licensor:             Coordination Inc.
 
-Licensed Work:        Domus App (BaseJackpot.sol)
+Licensed Work:        Domus App (DomusJackpot.sol)
                       The Licensed Work is (c) 2025 Coordination Inc.
 
 Change License: GNU General Public License v2.0 or later

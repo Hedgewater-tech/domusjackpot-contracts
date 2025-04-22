@@ -2,16 +2,16 @@ import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { DeployFunction } from "hardhat-deploy/types";
 
 /**
- * Deploys the BaseJackpot contract using the deployer account
+ * Deploys the DomusJackpot contract using the deployer account
  *
  * @param hre HardhatRuntimeEnvironment object.
  */
-const deployBaseJackpot: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
+const deployDomusJackpot: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const { getNamedAccounts, ethers, upgrades, deployments } = hre;
   const { deploy } = deployments;
   const { deployer } = await getNamedAccounts();
 
-  console.log("Starting BaseJackpot deployment...");
+  console.log("Starting DomusJackpot deployment...");
 
   // Get configuration from environment variables
   // 0x549Ebba8036Ab746611B4fFA1423eb0A4Df61440   Entropy hyperliquid mainnet
@@ -36,7 +36,7 @@ const deployBaseJackpot: DeployFunction = async function (hre: HardhatRuntimeEnv
 
   // Deploy the implementation contract
   // this is done to generate deployment log for verification purpose
-  await deploy("BaseJackpot", {
+  await deploy("DomusJackpot", {
     from: deployer,
     args: [], // No constructor arguments
     log: true,
@@ -45,14 +45,14 @@ const deployBaseJackpot: DeployFunction = async function (hre: HardhatRuntimeEnv
   // Deploy the proxy contract
   console.log("Deploying ERC1967Proxy...");
 
-  const BaseJackpotFactory = await ethers.getContractFactory("BaseJackpot", {
+  const DomusJackpotFactory = await ethers.getContractFactory("DomusJackpot", {
     signer: await ethers.getSigner(deployer),
   });
 
-  console.log("Deploying BaseJackpot...");
+  console.log("Deploying DomusJackpot...");
 
   const proxy = await upgrades.deployProxy(
-    BaseJackpotFactory,
+    DomusJackpotFactory,
     [entropyAddress, initialOwnerAddress, tokenAddress, ticketPrice],
     {
       kind: "uups",
@@ -63,11 +63,11 @@ const deployBaseJackpot: DeployFunction = async function (hre: HardhatRuntimeEnv
 
   // await proxy.deploymentTransaction()
   const proxyAddress = await proxy.getAddress();
-  console.log(`BaseJackpot proxy deployed to: ${proxyAddress}`);
+  console.log(`DomusJackpot proxy deployed to: ${proxyAddress}`);
 
   // Get the implementation address
   const implementationAddress = await upgrades.erc1967.getImplementationAddress(proxyAddress);
-  console.log(`BaseJackpot implementation deployed at: ${implementationAddress}`);
+  console.log(`DomusJackpot implementation deployed at: ${implementationAddress}`);
 
   console.log("Deployment completed successfully!");
 
@@ -78,8 +78,8 @@ const deployBaseJackpot: DeployFunction = async function (hre: HardhatRuntimeEnv
   // console.log(`npx hardhat verify --network ${hre.network.name} ${proxyAddress}`);
 };
 
-export default deployBaseJackpot;
+export default deployDomusJackpot;
 
 // Tags are useful if you have multiple deploy files and only want to run one of them.
 // e.g. yarn deploy --tags BaseJackpot
-deployBaseJackpot.tags = ["BaseJackpot"];
+deployDomusJackpot.tags = ["DomusJackpot"];
