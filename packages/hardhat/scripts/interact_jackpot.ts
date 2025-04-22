@@ -1,7 +1,7 @@
 // packages/hardhat/scripts/interact_jackpot.ts
-// Script to interact with the BaseJackpot contract
+// Script to interact with the DomusJackpot contract
 import { ethers } from "ethers";
-import BaseJackpotABI from "../artifacts/contracts/BaseJackpot.sol/BaseJackpot.json";
+import DomusJackpotABI from "../artifacts/contracts/DomusJackpot.sol/DomusJackpot.json";
 import * as dotenv from "dotenv";
 import * as path from "path";
 
@@ -44,7 +44,7 @@ async function main() {
   const signer = new ethers.Wallet(PRIVATE_KEY, provider);
 
   // Connect to contract with TypeScript interface
-  const jackpot = new ethers.Contract(CONTRACT_ADDRESS, BaseJackpotABI.abi, signer);
+  const jackpot = new ethers.Contract(CONTRACT_ADDRESS, DomusJackpotABI.abi, signer);
 
   // Get function and args from CLI
   const functionName = process.argv[2];
@@ -726,7 +726,7 @@ async function main() {
 
           // Create user wallet and contracts
           const userWallet = new ethers.Wallet(userPrivateKey, provider);
-          const userJackpot = new ethers.Contract(CONTRACT_ADDRESS, BaseJackpotABI.abi, userWallet);
+          const userJackpot = new ethers.Contract(CONTRACT_ADDRESS, DomusJackpotABI.abi, userWallet);
           const userUsdcContract = new ethers.Contract(
             "0x20679F4196f17a56711AD8b04776393e8F2499Ad",
             [
