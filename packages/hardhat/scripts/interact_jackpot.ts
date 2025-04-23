@@ -11,6 +11,7 @@ dotenv.config({ path: path.resolve(__dirname, "../.env") });
 // Configuration
 const RPC_URL = "https://rpc.hyperliquid.xyz/evm";
 const CONTRACT_ADDRESS = "0x7d4d84152aAcEAE2c5347A13d652e83528caa586";
+const USDC_ADDRESS = "0x02c6a2fA58cC01A18B8D9E00eA48d65E4dF26c70";
 // Use the private key from .env or fallback to the hardcoded one for testing
 const PRIVATE_KEY = process.env.PRIVATE_KEY;
 
@@ -49,6 +50,17 @@ async function main() {
   // Get function and args from CLI
   const functionName = process.argv[2];
   const args = process.argv.slice(3);
+
+  // Create token contract instance
+  const tokenContractInstance = new ethers.Contract(
+    USDC_ADDRESS,
+    [
+      "function approve(address spender, uint256 amount) public returns (bool)",
+      "function balanceOf(address account) public view returns (uint256)",
+      "function allowance(address owner, address spender) public view returns (uint256)",
+    ],
+    signer,
+  );
 
   switch (functionName) {
     case "buyTicket":
@@ -291,6 +303,60 @@ async function main() {
       const [userPool, lpPool] = await Promise.all([jackpot.userPoolTotal(), jackpot.lpPoolTotal()]);
       console.log(`User Pool: ${ethers.formatUnits(userPool, 18)}`);
       console.log(`LP Pool: ${ethers.formatUnits(lpPool, 18)}`);
+      // fetch contract usdc balance
+      // Create token contract instance
+      const contractBalance = await tokenContractInstance.balanceOf(CONTRACT_ADDRESS);
+      console.log(`Contract USDC balance: ${ethers.formatUnits(contractBalance, 18)} USDC`);
+
+      // Calculate total LP deposits (principal + stake)
+      try {
+        console.log("\n=== LP Deposits Breakdown ===");
+        let totalPrincipal = ethers.parseUnits("0", 18);
+        let totalStake = ethers.parseUnits("0", 18);
+        let activeLpCount = 0;
+
+        // Loop through active LP addresses
+        for (let i = 0; i < 100; i++) {
+          // Limit to 100 to avoid infinite loops
+          try {
+            const lpAddress = await jackpot.activeLpAddresses(i);
+            if (lpAddress === "0x0000000000000000000000000000000000000000") {
+              break; // End of list
+            }
+
+            const lpInfo = await jackpot.lpsInfo(lpAddress);
+            if (lpInfo.active) {
+              activeLpCount++;
+              totalPrincipal += BigInt(lpInfo.principal);
+              totalStake += BigInt(lpInfo.stake);
+            }
+          } catch (error: any) {
+            console.error("Error getting LP info:", error.message || String(error));
+            // Reached the end of the list or encountered an error
+            break;
+          }
+        }
+
+        console.log(`Active LP Count: ${activeLpCount}`);
+        console.log(`Total LP Principal: ${ethers.formatUnits(totalPrincipal, 18)} USDC`);
+        console.log(`Total LP Stake: ${ethers.formatUnits(totalStake, 18)} USDC`);
+        console.log(
+          `Total LP Deposits (Principal + Stake): ${ethers.formatUnits(totalPrincipal + totalStake, 18)} USDC`,
+        );
+
+        // Verify against contract balance
+        console.log(`\nBalance Verification:`);
+        console.log(`Contract USDC Balance: ${ethers.formatUnits(contractBalance, 18)} USDC`);
+        console.log(
+          `Total Tracked Funds (User Pool + LP Principal + LP Stake): ${ethers.formatUnits(userPool + totalPrincipal + totalStake, 18)} USDC`,
+        );
+
+        // Calculate and display any discrepancy
+        const discrepancy = BigInt(contractBalance) - (BigInt(userPool) + BigInt(totalPrincipal) + BigInt(totalStake));
+        console.log(`Discrepancy: ${ethers.formatUnits(discrepancy, 18)} USDC`);
+      } catch (error: any) {
+        console.error("Error calculating LP totals:", error.message || String(error));
+      }
       break;
 
     case "getLastWinner":
@@ -993,6 +1059,52 @@ async function main() {
       }
       break;
 
+    case "setMinLpDeposit":
+      if (args.length < 1) {
+        console.log("Usage: setMinLpDeposit <amount>");
+        break;
+      }
+
+      const minLpDepositAmount = ethers.parseUnits(args[0], 18);
+      console.log(`Setting minimum LP deposit to ${args[0]} USDC...`);
+
+      try {
+        const tx = await jackpot.setMinLpDeposit(minLpDepositAmount);
+        await tx.wait();
+        console.log(`Successfully set minimum LP deposit to ${args[0]} USDC`);
+
+        // Get updated LP pool information after setting minimum LP deposit
+        const [newMinLpDeposit, newLpPoolCap] = await Promise.all([jackpot.minLpDeposit(), jackpot.lpPoolCap()]);
+
+        console.log(`Current minimum LP deposit: ${ethers.formatUnits(newMinLpDeposit, 18)} USDC`);
+        console.log(`Current LP pool cap: ${ethers.formatUnits(newLpPoolCap, 18)} USDC`);
+      } catch (error: any) {
+        console.error("Failed to set minimum LP deposit:", error.message || String(error));
+      }
+      break;
+
+    case "setAllowPurchasing":
+      if (args.length < 1) {
+        console.log("Usage: setAllowPurchasing <true|false>");
+        break;
+      }
+
+      const allowPurchasingValue = args[0].toLowerCase() === "true";
+      console.log(`Setting allowPurchasing to ${allowPurchasingValue}...`);
+
+      try {
+        const tx = await jackpot.setAllowPurchasing(allowPurchasingValue);
+        await tx.wait();
+        console.log(`Successfully set allowPurchasing to ${allowPurchasingValue}`);
+
+        // Get updated purchasing status
+        const currentAllowPurchasing = await jackpot.allowPurchasing();
+        console.log(`Current allowPurchasing status: ${currentAllowPurchasing ? "Enabled" : "Disabled"}`);
+      } catch (error: any) {
+        console.error("Failed to set allowPurchasing:", error.message || String(error));
+      }
+      break;
+
     default:
       console.log("Unknown command. Available commands:");
       console.log("buyTicket <value> <referrer>");
@@ -1009,6 +1121,8 @@ async function main() {
       console.log("getLPPoolInfo");
       console.log("setLPPoolCap <amount>");
       console.log("setTicketPrice <price>");
+      console.log("setMinLpDeposit <amount>");
+      console.log("setAllowPurchasing <true|false>");
       console.log("getOwner");
       console.log("initializeContract <entropyAddress> <tokenAddress> <ticketPrice>");
       console.log("mintUSDC <recipient> <amount>");
