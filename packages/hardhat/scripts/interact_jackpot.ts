@@ -10,6 +10,8 @@ dotenv.config({ path: path.resolve(__dirname, "../.env") });
 
 // Configuration
 const RPC_URL = "https://rpc.hyperliquid.xyz/evm";
+// latest deployed contract : 0x0882AAb223456cA1649d3eC89e9d1D82678F178F
+// prev mainnet contract : 0x7d4d84152aAcEAE2c5347A13d652e83528caa586
 const CONTRACT_ADDRESS = "0x7d4d84152aAcEAE2c5347A13d652e83528caa586";
 const USDC_ADDRESS = "0x02c6a2fA58cC01A18B8D9E00eA48d65E4dF26c70";
 // Use the private key from .env or fallback to the hardcoded one for testing
@@ -268,7 +270,7 @@ async function main() {
         console.log(`Using random number: ${userRandomNumber}`);
 
         // Send transaction with ETH value for entropy fee (0.01 ETH as a safe default)
-        const entropyFee = ethers.parseEther("0.02");
+        const entropyFee = ethers.parseEther("0.022");
         console.log(`Using entropy fee: ${ethers.formatEther(entropyFee)} ETH`);
 
         const tx = await jackpot.runJackpot(userRandomNumber, { value: entropyFee });
