@@ -14,15 +14,15 @@ const deployDomusJackpot: DeployFunction = async function (hre: HardhatRuntimeEn
   console.log("Starting DomusJackpot deployment...");
 
   // Get configuration from environment variables
-  // 0x549Ebba8036Ab746611B4fFA1423eb0A4Df61440   Entropy hyperliquid mainnet
-  // 0xfA25E653b44586dBbe27eE9d252192F0e4956683   Entropy arbitrum sepolia
+  // 0xfA25E653b44586dBbe27eE9d252192F0e4956683   Entropy hyperliquid mainnet
+  // 0x549Ebba8036Ab746611B4fFA1423eb0A4Df61440   Entropy arbitrum sepolia
 
-  const entropyAddress = "0xfA25E653b44586dBbe27eE9d252192F0e4956683"; //process.env.ENTROPY_ADDRESS;
+  const entropyAddress = "0x549Ebba8036Ab746611B4fFA1423eb0A4Df61440"; //process.env.ENTROPY_ADDRESS;
   const initialOwnerAddress = process.env.INITIAL_OWNER_ADDRESS || deployer;
 
   // 0x02c6a2fA58cC01A18B8D9E00eA48d65E4dF26c70  FeUSD hyperliquid mainnet
   // 0x20679F4196f17a56711AD8b04776393e8F2499Ad   USDC arbitrum sepolia
-  const tokenAddress = "0x02c6a2fA58cC01A18B8D9E00eA48d65E4dF26c70"; //process.env.TOKEN_ADDRESS;
+  const tokenAddress = "0x20679F4196f17a56711AD8b04776393e8F2499Ad"; //process.env.TOKEN_ADDRESS;
   const ticketPrice = process.env.TICKET_PRICE || "1"; // Default to 1 if not specified
 
   if (!entropyAddress || !tokenAddress) {

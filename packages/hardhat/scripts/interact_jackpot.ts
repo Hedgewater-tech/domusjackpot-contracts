@@ -2,41 +2,7 @@
 // Script to interact with the DomusJackpot contract
 import { ethers } from "ethers";
 import DomusJackpotABI from "../artifacts/contracts/DomusJackpot.sol/DomusJackpot.json";
-import * as dotenv from "dotenv";
-import * as path from "path";
-
-// Load environment variables from .env file
-dotenv.config({ path: path.resolve(__dirname, "../.env") });
-
-// Configuration
-const RPC_URL = "https://rpc.hyperliquid.xyz/evm";
-// latest deployed contract : 0x0882AAb223456cA1649d3eC89e9d1D82678F178F
-// prev mainnet contract : 0x7d4d84152aAcEAE2c5347A13d652e83528caa586
-const CONTRACT_ADDRESS = "0x7d4d84152aAcEAE2c5347A13d652e83528caa586";
-const USDC_ADDRESS = "0x02c6a2fA58cC01A18B8D9E00eA48d65E4dF26c70";
-// Use the private key from .env or fallback to the hardcoded one for testing
-const PRIVATE_KEY = process.env.PRIVATE_KEY;
-
-// address:private_key
-const TEST_USERS = [
-  "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
-  "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
-  "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
-  "0x90F79bf6EB2c4f870365E785982E1f101E93b906",
-  "0x15d34AAf54267DB7D7c367839AAf71A00a2C6A65",
-  "0x9965507D1a55bcC2695C58ba16FB37d819B0A4dc",
-  "0x976EA74026E726554dB657fA54763abd0C3a0aa9",
-];
-
-const TEST_USER_PRIVATE_KEYS = [
-  "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80",
-  "0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d",
-  "0x5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a",
-  "0x7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6",
-  "0x47e179ec197488593b187f80a00eb0da91f1b9d0b13f8733639f19c30a34926a",
-  "0x8b3a350cf5c34c9194ca85829a2df0ec3153be0318b5e2d3348e872092edffba",
-  "0x92db14e403b83dfe3df233f83dfa3a0d7096f21ca9b0d6d6b8d88b2b4ec1564e",
-];
+import { CONTRACT_ADDRESS, PRIVATE_KEY, RPC_URL, TEST_USER_PRIVATE_KEYS, TEST_USERS, USDC_ADDRESS } from "./constants";
 
 async function main() {
   if (!PRIVATE_KEY) {
@@ -270,7 +236,7 @@ async function main() {
         console.log(`Using random number: ${userRandomNumber}`);
 
         // Send transaction with ETH value for entropy fee (0.01 ETH as a safe default)
-        const entropyFee = ethers.parseEther("0.022");
+        const entropyFee = ethers.parseEther("0.025");
         console.log(`Using entropy fee: ${ethers.formatEther(entropyFee)} ETH`);
 
         const tx = await jackpot.runJackpot(userRandomNumber, { value: entropyFee });
@@ -593,6 +559,68 @@ async function main() {
       }
       break;
 
+    case "getPrivateKeyBalance":
+      try {
+        const privateKey = PRIVATE_KEY;
+        // Create wallet from private key
+        const wallet = new ethers.Wallet(privateKey, provider);
+        const address = wallet.address;
+
+        console.log(`\n=== Wallet Information ===`);
+        console.log(`Address: ${address}`);
+
+        // Get ETH balance
+        const ethBalance = await provider.getBalance(address);
+        console.log(`ETH Balance: ${ethers.formatEther(ethBalance)} ETH`);
+
+        // Get USDC balance
+        const usdcContract = new ethers.Contract(
+          USDC_ADDRESS,
+          ["function balanceOf(address account) view returns (uint256)", "function decimals() view returns (uint8)"],
+          provider,
+        );
+
+        // Get token decimals
+        let tokenDecimals = 6; // Default for USDC
+        try {
+          tokenDecimals = await usdcContract.decimals();
+        } catch (error: any) {
+          console.log("Could not get token decimals, using default value of 6", error.message || String(error));
+        }
+
+        const usdcBalance = await usdcContract.balanceOf(address);
+        console.log(`USDC Balance: ${ethers.formatUnits(usdcBalance, tokenDecimals)} USDC`);
+
+        // Get referral fees if available
+        try {
+          const referralFees = await jackpot.referralFeesClaimable(address);
+          console.log(`Referral Fees Claimable: ${ethers.formatUnits(referralFees, tokenDecimals)} USDC`);
+        } catch (error: any) {
+          console.log("Could not retrieve referral fees", error);
+          // Ignore if referral fees function is not available
+        }
+
+        // Check if user has tickets or winnings
+        try {
+          const userInfo = await jackpot.usersInfo(address);
+          if (userInfo) {
+            console.log(`\n=== Jackpot Information ===`);
+            console.log(`Tickets Purchased: ${userInfo.ticketsPurchasedTotalBps || "0"}`);
+            console.log(
+              `Winnings Claimable: ${ethers.formatUnits(userInfo.winningsClaimable || "0", tokenDecimals)} USDC`,
+            );
+            console.log(`Active: ${userInfo.active ? "Yes" : "No"}`);
+          }
+        } catch (error) {
+          console.log("Could not retrieve user info", error);
+          // Ignore if user info is not available
+        }
+      } catch (error: any) {
+        console.error("Failed to get wallet balance:", error.message || String(error));
+        console.log("Make sure you provided a valid private key");
+      }
+      break;
+
     case "initializeContract":
       if (args.length < 3) {
         console.log("Usage: initializeContract <entropyAddress> <tokenAddress> <ticketPrice>");
@@ -695,9 +723,9 @@ async function main() {
     case "fundTestUsers":
       console.log("Funding all test users with 0.01 ETH and 10,000 USDC each...");
 
-      const ethAmountPerUser = "0";
-      const usdcAmountPerUser = "10000000000000000000000";
-      const testUsdcAddress = "0x20679F4196f17a56711AD8b04776393e8F2499Ad";
+      const ethAmountPerUser = "0.02";
+      const usdcAmountPerUser = "1000";
+      const testUsdcAddress = USDC_ADDRESS;
 
       // Create USDC contract instance with mint function
       const testUsdcContract = new ethers.Contract(
@@ -719,7 +747,7 @@ async function main() {
           const usdcBalanceBefore = await testUsdcContract.balanceOf(userAddress);
           const ethBalanceBefore = await provider.getBalance(userAddress);
 
-          console.log(`USDC balance before: ${ethers.formatUnits(usdcBalanceBefore, 6)} USDC`);
+          console.log(`USDC balance before: ${ethers.formatUnits(usdcBalanceBefore, 18)} USDC`);
           console.log(`ETH balance before: ${ethers.formatEther(ethBalanceBefore)} ETH`);
 
           // Send ETH transaction
@@ -731,7 +759,7 @@ async function main() {
           console.log(`Sent ${ethAmountPerUser} ETH to ${userAddress}`);
 
           // Mint USDC tokens
-          const mintTx = await testUsdcContract.mint(userAddress, ethers.parseUnits(usdcAmountPerUser, 6));
+          const mintTx = await testUsdcContract.mint(userAddress, ethers.parseEther(usdcAmountPerUser));
           await mintTx.wait();
           console.log(`Minted ${usdcAmountPerUser} USDC to ${userAddress}`);
 
@@ -739,7 +767,7 @@ async function main() {
           const usdcBalanceAfter = await testUsdcContract.balanceOf(userAddress);
           const ethBalanceAfter = await provider.getBalance(userAddress);
 
-          console.log(`USDC balance after: ${ethers.formatUnits(usdcBalanceAfter, 6)} USDC`);
+          console.log(`USDC balance after: ${ethers.formatUnits(usdcBalanceAfter, 18)} USDC`);
           console.log(`ETH balance after: ${ethers.formatEther(ethBalanceAfter)} ETH`);
         }
 
@@ -875,6 +903,13 @@ async function main() {
         const activeLpCount = await jackpot.activeLpAddresses.length;
         console.log(`\nActive LPs: ${activeLpCount}`);
 
+        // Create USDC contract instance for balance checks
+        const usdcContract = new ethers.Contract(
+          USDC_ADDRESS,
+          ["function balanceOf(address account) external view returns (uint256)"],
+          provider,
+        );
+
         // Try to get information about LPs
         try {
           console.log("\n=== Active Liquidity Providers ===");
@@ -895,6 +930,12 @@ async function main() {
                 console.log(`\nLP ${foundLPs}: ${lpAddress}`);
                 console.log(`- Principal: ${ethers.formatUnits(lpInfo.principal, 6)} USDC`);
                 console.log(`- Risk Percentage: ${lpInfo.riskPercentage}%`);
+
+                // Get LP's USDC and ETH balances
+                const lpUsdcBalance = await usdcContract.balanceOf(lpAddress);
+                const lpEthBalance = await provider.getBalance(lpAddress);
+                console.log(`- USDC Balance: ${ethers.formatUnits(lpUsdcBalance, 6)} USDC`);
+                console.log(`- ETH Balance: ${ethers.formatEther(lpEthBalance)} ETH`);
               }
 
               lpIndex++;
@@ -956,6 +997,20 @@ async function main() {
               console.log(`- Tickets Weight in Pool: ${(ticketsPurchasedBps / 10000).toFixed(2)} basis points`);
               console.log(`- Winnings Claimable: ${ethers.formatUnits(userStruct[1], 6)} USDC`);
               console.log(`- Active: ${userStruct[2] ? "Yes" : "No"}`);
+
+              // Get user's USDC and ETH balances
+              const userUsdcBalance = await usdcContract.balanceOf(userAddress);
+              const userEthBalance = await provider.getBalance(userAddress);
+              console.log(`- USDC Balance: ${ethers.formatUnits(userUsdcBalance, 6)} USDC`);
+              console.log(`- ETH Balance: ${ethers.formatEther(userEthBalance)} ETH`);
+
+              // Get referral fees claimable
+              try {
+                const referralFees = await jackpot.referralFeesClaimable(userAddress);
+                console.log(`- Referral Fees Claimable: ${ethers.formatUnits(referralFees, 6)} USDC`);
+              } catch (error: any) {
+                console.log("Could not retrieve referral fees", error);
+              }
             }
           } catch (error: any) {
             console.log(`Could not retrieve information for user ${userAddress}: ${error.message}`);
@@ -1107,6 +1162,59 @@ async function main() {
       }
       break;
 
+    case "claimReferralBonus":
+      try {
+        // Always use the owner's private key (main signer)
+        console.log(`Using wallet: ${signer.address}`);
+
+        // Check referral fees claimable
+        const referralFees = await jackpot.referralFeesClaimable(signer.address);
+        console.log(`Referral fees claimable: ${ethers.formatUnits(referralFees, 6)} USDC`);
+
+        if (referralFees <= 0) {
+          console.log("No referral fees to claim");
+          break;
+        }
+
+        // Withdraw referral fees
+        console.log("Claiming referral fees...");
+        const tx = await jackpot.withdrawReferralFees();
+        const receipt = await tx.wait();
+        console.log(`Successfully claimed referral fees: ${tx.hash}`);
+
+        // Try to find the UserReferralFeeWithdrawal event
+        const withdrawalEvent = jackpot.interface.getEvent("UserReferralFeeWithdrawal");
+        if (withdrawalEvent) {
+          const topicHash = withdrawalEvent.topicHash;
+          const events = receipt.logs.filter((log: any) => log.topics[0] === topicHash);
+
+          if (events.length > 0) {
+            const event = jackpot.interface.parseLog(events[0]);
+            if (event && event.args) {
+              console.log(`Withdrawal event:`);
+              console.log(`- User: ${event.args.user}`);
+              console.log(`- Amount: ${ethers.formatUnits(event.args.amount, 6)} USDC`);
+            }
+          }
+        }
+
+        // Check USDC balance after withdrawal
+        const usdcContract = new ethers.Contract(
+          USDC_ADDRESS,
+          ["function balanceOf(address account) view returns (uint256)"],
+          provider,
+        );
+        const usdcBalance = await usdcContract.balanceOf(signer.address);
+        console.log(`USDC balance after withdrawal: ${ethers.formatUnits(usdcBalance, 6)} USDC`);
+
+        // Verify referral fees are now zero
+        const feesAfter = await jackpot.referralFeesClaimable(signer.address);
+        console.log(`Referral fees after withdrawal: ${ethers.formatUnits(feesAfter, 6)} USDC`);
+      } catch (error: any) {
+        console.error("Failed to claim referral fees:", error.message || String(error));
+      }
+      break;
+
     default:
       console.log("Unknown command. Available commands:");
       console.log("buyTicket <value> <referrer>");
@@ -1126,6 +1234,8 @@ async function main() {
       console.log("setMinLpDeposit <amount>");
       console.log("setAllowPurchasing <true|false>");
       console.log("getOwner");
+      console.log("getPrivateKeyBalance");
+      console.log("claimReferralBonus");
       console.log("initializeContract <entropyAddress> <tokenAddress> <ticketPrice>");
       console.log("mintUSDC <recipient> <amount>");
       console.log("fundTestUsers");
@@ -1136,7 +1246,7 @@ async function main() {
   }
 }
 
-main().catch(error => {
+main().catch((error: Error) => {
   console.error(error);
   process.exitCode = 1;
 });
