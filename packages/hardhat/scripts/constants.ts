@@ -12,11 +12,11 @@ export const RPC_URL = "https://sepolia-rollup.arbitrum.io/rpc";
 // prev mainnet contract : 0x7d4d84152aAcEAE2c5347A13d652e83528caa586
 // arb sepolia testnet : 0x657952eaA63c7Ca1Ab0555B482D6cD65020a5908
 
-export const CONTRACT_ADDRESS = "0x657952eaA63c7Ca1Ab0555B482D6cD65020a5908";
+export const CONTRACT_ADDRESS = "0x0882AAb223456cA1649d3eC89e9d1D82678F178F";
 
 // hype evm mainnet : 0x02c6a2fA58cC01A18B8D9E00eA48d65E4dF26c70
 // arb sepolia testnet : 0x20679F4196f17a56711AD8b04776393e8F2499Ad
-export const USDC_ADDRESS = "0x20679F4196f17a56711AD8b04776393e8F2499Ad";
+export const USDC_ADDRESS = "0x02c6a2fA58cC01A18B8D9E00eA48d65E4dF26c70";
 // Use the private key from .env or fallback to the hardcoded one for testing
 export const PRIVATE_KEY = process.env.PRIVATE_KEY;
 
