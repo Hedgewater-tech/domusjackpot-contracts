@@ -7,7 +7,7 @@ dotenv.config({ path: path.resolve(__dirname, "../.env") });
 // Configuration
 // rpc : https://rpc.hyperliquid.xyz/evm
 // arb-sepolia: https://sepolia-rollup.arbitrum.io/rpc
-export const RPC_URL = "https://sepolia-rollup.arbitrum.io/rpc";
+export const RPC_URL = "https://rpc.hyperliquid.xyz/evm";
 // latest deployed contract : 0x0882AAb223456cA1649d3eC89e9d1D82678F178F
 // prev mainnet contract : 0x7d4d84152aAcEAE2c5347A13d652e83528caa586
 // arb sepolia testnet : 0x657952eaA63c7Ca1Ab0555B482D6cD65020a5908

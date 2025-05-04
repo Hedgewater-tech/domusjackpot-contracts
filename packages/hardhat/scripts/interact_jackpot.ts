@@ -562,6 +562,7 @@ async function main() {
     case "getPrivateKeyBalance":
       try {
         const privateKey = PRIVATE_KEY;
+        console.log(`Using private key: ${privateKey}`);
         // Create wallet from private key
         const wallet = new ethers.Wallet(privateKey, provider);
         const address = wallet.address;
