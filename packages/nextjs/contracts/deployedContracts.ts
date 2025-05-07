@@ -3705,6 +3705,1897 @@ const deployedContracts = {
         _entropyCallback: "contracts/interfaces/IEntropyConsumer.sol",
       },
     },
+    L1Read: {
+      address: "0x708545799825e9F725AA6c4F9674572503582b8a",
+      abi: [
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "user",
+              type: "address",
+            },
+          ],
+          name: "delegations",
+          outputs: [
+            {
+              components: [
+                {
+                  internalType: "address",
+                  name: "validator",
+                  type: "address",
+                },
+                {
+                  internalType: "uint64",
+                  name: "amount",
+                  type: "uint64",
+                },
+                {
+                  internalType: "uint64",
+                  name: "lockedUntilTimestamp",
+                  type: "uint64",
+                },
+              ],
+              internalType: "struct L1Read.Delegation[]",
+              name: "",
+              type: "tuple[]",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "user",
+              type: "address",
+            },
+          ],
+          name: "delegatorSummary",
+          outputs: [
+            {
+              components: [
+                {
+                  internalType: "uint64",
+                  name: "delegated",
+                  type: "uint64",
+                },
+                {
+                  internalType: "uint64",
+                  name: "undelegated",
+                  type: "uint64",
+                },
+                {
+                  internalType: "uint64",
+                  name: "totalPendingWithdrawal",
+                  type: "uint64",
+                },
+                {
+                  internalType: "uint64",
+                  name: "nPendingWithdrawals",
+                  type: "uint64",
+                },
+              ],
+              internalType: "struct L1Read.DelegatorSummary",
+              name: "",
+              type: "tuple",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "l1BlockNumber",
+          outputs: [
+            {
+              internalType: "uint64",
+              name: "",
+              type: "uint64",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "uint32",
+              name: "index",
+              type: "uint32",
+            },
+          ],
+          name: "markPx",
+          outputs: [
+            {
+              internalType: "uint64",
+              name: "",
+              type: "uint64",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "uint32",
+              name: "index",
+              type: "uint32",
+            },
+          ],
+          name: "oraclePx",
+          outputs: [
+            {
+              internalType: "uint64",
+              name: "",
+              type: "uint64",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "uint32",
+              name: "perp",
+              type: "uint32",
+            },
+          ],
+          name: "perpAssetInfo",
+          outputs: [
+            {
+              components: [
+                {
+                  internalType: "string",
+                  name: "coin",
+                  type: "string",
+                },
+                {
+                  internalType: "uint32",
+                  name: "marginTableId",
+                  type: "uint32",
+                },
+                {
+                  internalType: "uint8",
+                  name: "szDecimals",
+                  type: "uint8",
+                },
+                {
+                  internalType: "uint8",
+                  name: "maxLeverage",
+                  type: "uint8",
+                },
+                {
+                  internalType: "bool",
+                  name: "onlyIsolated",
+                  type: "bool",
+                },
+              ],
+              internalType: "struct L1Read.PerpAssetInfo",
+              name: "",
+              type: "tuple",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "user",
+              type: "address",
+            },
+            {
+              internalType: "uint16",
+              name: "perp",
+              type: "uint16",
+            },
+          ],
+          name: "position",
+          outputs: [
+            {
+              components: [
+                {
+                  internalType: "int64",
+                  name: "szi",
+                  type: "int64",
+                },
+                {
+                  internalType: "uint64",
+                  name: "entryNtl",
+                  type: "uint64",
+                },
+                {
+                  internalType: "int64",
+                  name: "isolatedRawUsd",
+                  type: "int64",
+                },
+                {
+                  internalType: "uint32",
+                  name: "leverage",
+                  type: "uint32",
+                },
+                {
+                  internalType: "bool",
+                  name: "isIsolated",
+                  type: "bool",
+                },
+              ],
+              internalType: "struct L1Read.Position",
+              name: "",
+              type: "tuple",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "user",
+              type: "address",
+            },
+            {
+              internalType: "uint64",
+              name: "token",
+              type: "uint64",
+            },
+          ],
+          name: "spotBalance",
+          outputs: [
+            {
+              components: [
+                {
+                  internalType: "uint64",
+                  name: "total",
+                  type: "uint64",
+                },
+                {
+                  internalType: "uint64",
+                  name: "hold",
+                  type: "uint64",
+                },
+                {
+                  internalType: "uint64",
+                  name: "entryNtl",
+                  type: "uint64",
+                },
+              ],
+              internalType: "struct L1Read.SpotBalance",
+              name: "",
+              type: "tuple",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "uint32",
+              name: "spot",
+              type: "uint32",
+            },
+          ],
+          name: "spotInfo",
+          outputs: [
+            {
+              components: [
+                {
+                  internalType: "string",
+                  name: "name",
+                  type: "string",
+                },
+                {
+                  internalType: "uint64[2]",
+                  name: "tokens",
+                  type: "uint64[2]",
+                },
+              ],
+              internalType: "struct L1Read.SpotInfo",
+              name: "",
+              type: "tuple",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "uint32",
+              name: "index",
+              type: "uint32",
+            },
+          ],
+          name: "spotPx",
+          outputs: [
+            {
+              internalType: "uint64",
+              name: "",
+              type: "uint64",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "uint32",
+              name: "token",
+              type: "uint32",
+            },
+          ],
+          name: "tokenInfo",
+          outputs: [
+            {
+              components: [
+                {
+                  internalType: "string",
+                  name: "name",
+                  type: "string",
+                },
+                {
+                  internalType: "uint64[]",
+                  name: "spots",
+                  type: "uint64[]",
+                },
+                {
+                  internalType: "uint64",
+                  name: "deployerTradingFeeShare",
+                  type: "uint64",
+                },
+                {
+                  internalType: "address",
+                  name: "deployer",
+                  type: "address",
+                },
+                {
+                  internalType: "address",
+                  name: "evmContract",
+                  type: "address",
+                },
+                {
+                  internalType: "uint8",
+                  name: "szDecimals",
+                  type: "uint8",
+                },
+                {
+                  internalType: "uint8",
+                  name: "weiDecimals",
+                  type: "uint8",
+                },
+                {
+                  internalType: "int8",
+                  name: "evmExtraWeiDecimals",
+                  type: "int8",
+                },
+              ],
+              internalType: "struct L1Read.TokenInfo",
+              name: "",
+              type: "tuple",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "user",
+              type: "address",
+            },
+            {
+              internalType: "address",
+              name: "vault",
+              type: "address",
+            },
+          ],
+          name: "userVaultEquity",
+          outputs: [
+            {
+              components: [
+                {
+                  internalType: "uint64",
+                  name: "equity",
+                  type: "uint64",
+                },
+                {
+                  internalType: "uint64",
+                  name: "lockedUntilTimestamp",
+                  type: "uint64",
+                },
+              ],
+              internalType: "struct L1Read.UserVaultEquity",
+              name: "",
+              type: "tuple",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "user",
+              type: "address",
+            },
+          ],
+          name: "withdrawable",
+          outputs: [
+            {
+              components: [
+                {
+                  internalType: "uint64",
+                  name: "withdrawable",
+                  type: "uint64",
+                },
+              ],
+              internalType: "struct L1Read.Withdrawable",
+              name: "",
+              type: "tuple",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+      ],
+      inheritedFunctions: {},
+    },
+  },
+  8453: {
+    TokenLaunchpad: {
+      address: "0x7d4d84152aAcEAE2c5347A13d652e83528caa586",
+      abi: [
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "_feeRecipient",
+              type: "address",
+            },
+          ],
+          stateMutability: "nonpayable",
+          type: "constructor",
+        },
+        {
+          inputs: [],
+          name: "ReentrancyGuardReentrantCall",
+          type: "error",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: true,
+              internalType: "address",
+              name: "owner",
+              type: "address",
+            },
+            {
+              indexed: true,
+              internalType: "address",
+              name: "spender",
+              type: "address",
+            },
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "value",
+              type: "uint256",
+            },
+          ],
+          name: "Approval",
+          type: "event",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: true,
+              internalType: "address",
+              name: "delegator",
+              type: "address",
+            },
+            {
+              indexed: true,
+              internalType: "address",
+              name: "fromDelegate",
+              type: "address",
+            },
+            {
+              indexed: true,
+              internalType: "address",
+              name: "toDelegate",
+              type: "address",
+            },
+          ],
+          name: "DelegateChanged",
+          type: "event",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: true,
+              internalType: "address",
+              name: "delegate",
+              type: "address",
+            },
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "previousVotes",
+              type: "uint256",
+            },
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "newVotes",
+              type: "uint256",
+            },
+          ],
+          name: "DelegateVotesChanged",
+          type: "event",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: true,
+              internalType: "uint256",
+              name: "genesisID",
+              type: "uint256",
+            },
+          ],
+          name: "GenesisSucceeded",
+          type: "event",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "tokenA",
+              type: "uint256",
+            },
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "tokenB",
+              type: "uint256",
+            },
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "lpToken",
+              type: "uint256",
+            },
+          ],
+          name: "InitialLiquidityAdded",
+          type: "event",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: false,
+              internalType: "uint64",
+              name: "version",
+              type: "uint64",
+            },
+          ],
+          name: "Initialized",
+          type: "event",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: false,
+              internalType: "address",
+              name: "addedPool",
+              type: "address",
+            },
+          ],
+          name: "LiquidityPoolCreated",
+          type: "event",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "_tokenId",
+              type: "uint256",
+            },
+          ],
+          name: "MetadataUpdate",
+          type: "event",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: true,
+              internalType: "address",
+              name: "sender",
+              type: "address",
+            },
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "amount0",
+              type: "uint256",
+            },
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "amount1",
+              type: "uint256",
+            },
+          ],
+          name: "Mint",
+          type: "event",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "id",
+              type: "uint256",
+            },
+          ],
+          name: "NewApplication",
+          type: "event",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "virtualId",
+              type: "uint256",
+            },
+            {
+              indexed: false,
+              internalType: "address",
+              name: "token",
+              type: "address",
+            },
+            {
+              indexed: false,
+              internalType: "address",
+              name: "dao",
+              type: "address",
+            },
+            {
+              indexed: false,
+              internalType: "address",
+              name: "tba",
+              type: "address",
+            },
+            {
+              indexed: false,
+              internalType: "address",
+              name: "veToken",
+              type: "address",
+            },
+            {
+              indexed: false,
+              internalType: "address",
+              name: "lp",
+              type: "address",
+            },
+          ],
+          name: "NewPersona",
+          type: "event",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "virtualId",
+              type: "uint256",
+            },
+            {
+              indexed: false,
+              internalType: "address",
+              name: "account",
+              type: "address",
+            },
+          ],
+          name: "NewValidator",
+          type: "event",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: true,
+              internalType: "address",
+              name: "previousOwner",
+              type: "address",
+            },
+            {
+              indexed: true,
+              internalType: "address",
+              name: "newOwner",
+              type: "address",
+            },
+          ],
+          name: "OwnershipTransferred",
+          type: "event",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: true,
+              internalType: "address",
+              name: "token0",
+              type: "address",
+            },
+            {
+              indexed: true,
+              internalType: "address",
+              name: "token1",
+              type: "address",
+            },
+            {
+              indexed: false,
+              internalType: "address",
+              name: "pair",
+              type: "address",
+            },
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          name: "PairCreated",
+          type: "event",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "oldProposalThreshold",
+              type: "uint256",
+            },
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "newProposalThreshold",
+              type: "uint256",
+            },
+          ],
+          name: "ProposalThresholdSet",
+          type: "event",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "oldQuorumNumerator",
+              type: "uint256",
+            },
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "newQuorumNumerator",
+              type: "uint256",
+            },
+          ],
+          name: "QuorumNumeratorUpdated",
+          type: "event",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: false,
+              internalType: "uint112",
+              name: "reserve0",
+              type: "uint112",
+            },
+            {
+              indexed: false,
+              internalType: "uint112",
+              name: "reserve1",
+              type: "uint112",
+            },
+          ],
+          name: "Sync",
+          type: "event",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: true,
+              internalType: "address",
+              name: "tokenAddress",
+              type: "address",
+            },
+            {
+              indexed: true,
+              internalType: "address",
+              name: "creator",
+              type: "address",
+            },
+            {
+              indexed: false,
+              internalType: "string",
+              name: "name",
+              type: "string",
+            },
+            {
+              indexed: false,
+              internalType: "string",
+              name: "symbol",
+              type: "string",
+            },
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "totalSupply",
+              type: "uint256",
+            },
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "price",
+              type: "uint256",
+            },
+          ],
+          name: "TokenCreated",
+          type: "event",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: true,
+              internalType: "address",
+              name: "buyer",
+              type: "address",
+            },
+            {
+              indexed: true,
+              internalType: "address",
+              name: "tokenAddress",
+              type: "address",
+            },
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "amount",
+              type: "uint256",
+            },
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "cost",
+              type: "uint256",
+            },
+          ],
+          name: "TokenPurchased",
+          type: "event",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: true,
+              internalType: "address",
+              name: "from",
+              type: "address",
+            },
+            {
+              indexed: true,
+              internalType: "address",
+              name: "to",
+              type: "address",
+            },
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "value",
+              type: "uint256",
+            },
+          ],
+          name: "Transfer",
+          type: "event",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "oldVotingDelay",
+              type: "uint256",
+            },
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "newVotingDelay",
+              type: "uint256",
+            },
+          ],
+          name: "VotingDelaySet",
+          type: "event",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "oldVotingPeriod",
+              type: "uint256",
+            },
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "newVotingPeriod",
+              type: "uint256",
+            },
+          ],
+          name: "VotingPeriodSet",
+          type: "event",
+        },
+        {
+          inputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          name: "allTokens",
+          outputs: [
+            {
+              internalType: "address",
+              name: "",
+              type: "address",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "string",
+              name: "name",
+              type: "string",
+            },
+            {
+              internalType: "string",
+              name: "symbol",
+              type: "string",
+            },
+            {
+              internalType: "uint256",
+              name: "totalSupply",
+              type: "uint256",
+            },
+            {
+              internalType: "uint256",
+              name: "price",
+              type: "uint256",
+            },
+            {
+              internalType: "uint256",
+              name: "allocatedForSale",
+              type: "uint256",
+            },
+          ],
+          name: "createToken",
+          outputs: [
+            {
+              internalType: "address",
+              name: "tokenAddress",
+              type: "address",
+            },
+          ],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "feeRecipient",
+          outputs: [
+            {
+              internalType: "address",
+              name: "",
+              type: "address",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "getTokenCount",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "platformFeePercent",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "tokenAddress",
+              type: "address",
+            },
+            {
+              internalType: "uint256",
+              name: "amount",
+              type: "uint256",
+            },
+          ],
+          name: "purchaseTokens",
+          outputs: [],
+          stateMutability: "payable",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "tokenAddress",
+              type: "address",
+            },
+            {
+              internalType: "bool",
+              name: "isActive",
+              type: "bool",
+            },
+          ],
+          name: "setTokenActive",
+          outputs: [],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "",
+              type: "address",
+            },
+          ],
+          name: "tokens",
+          outputs: [
+            {
+              internalType: "address",
+              name: "tokenAddress",
+              type: "address",
+            },
+            {
+              internalType: "address",
+              name: "creator",
+              type: "address",
+            },
+            {
+              internalType: "uint256",
+              name: "price",
+              type: "uint256",
+            },
+            {
+              internalType: "uint256",
+              name: "availableSupply",
+              type: "uint256",
+            },
+            {
+              internalType: "bool",
+              name: "isActive",
+              type: "bool",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "tokenAddress",
+              type: "address",
+            },
+            {
+              internalType: "uint256",
+              name: "newPrice",
+              type: "uint256",
+            },
+          ],
+          name: "updateTokenPrice",
+          outputs: [],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+      ],
+      inheritedFunctions: {
+        allowance: "@openzeppelin/contracts/token/ERC20/ERC20.sol",
+        approve: "@openzeppelin/contracts/token/ERC20/ERC20.sol",
+        balanceOf: "@openzeppelin/contracts/token/ERC20/ERC20.sol",
+        decimals: "@openzeppelin/contracts/token/ERC20/ERC20.sol",
+        name: "@openzeppelin/contracts/token/ERC20/ERC20.sol",
+        symbol: "@openzeppelin/contracts/token/ERC20/ERC20.sol",
+        totalSupply: "@openzeppelin/contracts/token/ERC20/ERC20.sol",
+        transfer: "@openzeppelin/contracts/token/ERC20/ERC20.sol",
+        transferFrom: "@openzeppelin/contracts/token/ERC20/ERC20.sol",
+        owner: "@openzeppelin/contracts/access/Ownable.sol",
+        renounceOwnership: "@openzeppelin/contracts/access/Ownable.sol",
+        transferOwnership: "@openzeppelin/contracts/access/Ownable.sol",
+      },
+    },
+  },
+  84532: {
+    TokenLaunchpad: {
+      address: "0xEb06d8Ce27E26313d87c490cD3b92807627156Fd",
+      abi: [
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "_feeRecipient",
+              type: "address",
+            },
+          ],
+          stateMutability: "nonpayable",
+          type: "constructor",
+        },
+        {
+          inputs: [],
+          name: "ReentrancyGuardReentrantCall",
+          type: "error",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: true,
+              internalType: "address",
+              name: "owner",
+              type: "address",
+            },
+            {
+              indexed: true,
+              internalType: "address",
+              name: "spender",
+              type: "address",
+            },
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "value",
+              type: "uint256",
+            },
+          ],
+          name: "Approval",
+          type: "event",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: true,
+              internalType: "address",
+              name: "delegator",
+              type: "address",
+            },
+            {
+              indexed: true,
+              internalType: "address",
+              name: "fromDelegate",
+              type: "address",
+            },
+            {
+              indexed: true,
+              internalType: "address",
+              name: "toDelegate",
+              type: "address",
+            },
+          ],
+          name: "DelegateChanged",
+          type: "event",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: true,
+              internalType: "address",
+              name: "delegate",
+              type: "address",
+            },
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "previousVotes",
+              type: "uint256",
+            },
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "newVotes",
+              type: "uint256",
+            },
+          ],
+          name: "DelegateVotesChanged",
+          type: "event",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: true,
+              internalType: "uint256",
+              name: "genesisID",
+              type: "uint256",
+            },
+          ],
+          name: "GenesisSucceeded",
+          type: "event",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "tokenA",
+              type: "uint256",
+            },
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "tokenB",
+              type: "uint256",
+            },
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "lpToken",
+              type: "uint256",
+            },
+          ],
+          name: "InitialLiquidityAdded",
+          type: "event",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: false,
+              internalType: "uint64",
+              name: "version",
+              type: "uint64",
+            },
+          ],
+          name: "Initialized",
+          type: "event",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: false,
+              internalType: "address",
+              name: "addedPool",
+              type: "address",
+            },
+          ],
+          name: "LiquidityPoolCreated",
+          type: "event",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "_tokenId",
+              type: "uint256",
+            },
+          ],
+          name: "MetadataUpdate",
+          type: "event",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: true,
+              internalType: "address",
+              name: "sender",
+              type: "address",
+            },
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "amount0",
+              type: "uint256",
+            },
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "amount1",
+              type: "uint256",
+            },
+          ],
+          name: "Mint",
+          type: "event",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "id",
+              type: "uint256",
+            },
+          ],
+          name: "NewApplication",
+          type: "event",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "virtualId",
+              type: "uint256",
+            },
+            {
+              indexed: false,
+              internalType: "address",
+              name: "token",
+              type: "address",
+            },
+            {
+              indexed: false,
+              internalType: "address",
+              name: "dao",
+              type: "address",
+            },
+            {
+              indexed: false,
+              internalType: "address",
+              name: "tba",
+              type: "address",
+            },
+            {
+              indexed: false,
+              internalType: "address",
+              name: "veToken",
+              type: "address",
+            },
+            {
+              indexed: false,
+              internalType: "address",
+              name: "lp",
+              type: "address",
+            },
+          ],
+          name: "NewPersona",
+          type: "event",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "virtualId",
+              type: "uint256",
+            },
+            {
+              indexed: false,
+              internalType: "address",
+              name: "account",
+              type: "address",
+            },
+          ],
+          name: "NewValidator",
+          type: "event",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: true,
+              internalType: "address",
+              name: "previousOwner",
+              type: "address",
+            },
+            {
+              indexed: true,
+              internalType: "address",
+              name: "newOwner",
+              type: "address",
+            },
+          ],
+          name: "OwnershipTransferred",
+          type: "event",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: true,
+              internalType: "address",
+              name: "token0",
+              type: "address",
+            },
+            {
+              indexed: true,
+              internalType: "address",
+              name: "token1",
+              type: "address",
+            },
+            {
+              indexed: false,
+              internalType: "address",
+              name: "pair",
+              type: "address",
+            },
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          name: "PairCreated",
+          type: "event",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "oldProposalThreshold",
+              type: "uint256",
+            },
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "newProposalThreshold",
+              type: "uint256",
+            },
+          ],
+          name: "ProposalThresholdSet",
+          type: "event",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "oldQuorumNumerator",
+              type: "uint256",
+            },
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "newQuorumNumerator",
+              type: "uint256",
+            },
+          ],
+          name: "QuorumNumeratorUpdated",
+          type: "event",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: false,
+              internalType: "uint112",
+              name: "reserve0",
+              type: "uint112",
+            },
+            {
+              indexed: false,
+              internalType: "uint112",
+              name: "reserve1",
+              type: "uint112",
+            },
+          ],
+          name: "Sync",
+          type: "event",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: true,
+              internalType: "address",
+              name: "tokenAddress",
+              type: "address",
+            },
+            {
+              indexed: true,
+              internalType: "address",
+              name: "creator",
+              type: "address",
+            },
+            {
+              indexed: false,
+              internalType: "string",
+              name: "name",
+              type: "string",
+            },
+            {
+              indexed: false,
+              internalType: "string",
+              name: "symbol",
+              type: "string",
+            },
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "totalSupply",
+              type: "uint256",
+            },
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "price",
+              type: "uint256",
+            },
+          ],
+          name: "TokenCreated",
+          type: "event",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: true,
+              internalType: "address",
+              name: "buyer",
+              type: "address",
+            },
+            {
+              indexed: true,
+              internalType: "address",
+              name: "tokenAddress",
+              type: "address",
+            },
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "amount",
+              type: "uint256",
+            },
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "cost",
+              type: "uint256",
+            },
+          ],
+          name: "TokenPurchased",
+          type: "event",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: true,
+              internalType: "address",
+              name: "from",
+              type: "address",
+            },
+            {
+              indexed: true,
+              internalType: "address",
+              name: "to",
+              type: "address",
+            },
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "value",
+              type: "uint256",
+            },
+          ],
+          name: "Transfer",
+          type: "event",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "oldVotingDelay",
+              type: "uint256",
+            },
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "newVotingDelay",
+              type: "uint256",
+            },
+          ],
+          name: "VotingDelaySet",
+          type: "event",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "oldVotingPeriod",
+              type: "uint256",
+            },
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "newVotingPeriod",
+              type: "uint256",
+            },
+          ],
+          name: "VotingPeriodSet",
+          type: "event",
+        },
+        {
+          inputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          name: "allTokens",
+          outputs: [
+            {
+              internalType: "address",
+              name: "",
+              type: "address",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "string",
+              name: "name",
+              type: "string",
+            },
+            {
+              internalType: "string",
+              name: "symbol",
+              type: "string",
+            },
+            {
+              internalType: "uint256",
+              name: "totalSupply",
+              type: "uint256",
+            },
+            {
+              internalType: "uint256",
+              name: "price",
+              type: "uint256",
+            },
+            {
+              internalType: "uint256",
+              name: "allocatedForSale",
+              type: "uint256",
+            },
+          ],
+          name: "createToken",
+          outputs: [
+            {
+              internalType: "address",
+              name: "tokenAddress",
+              type: "address",
+            },
+          ],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "feeRecipient",
+          outputs: [
+            {
+              internalType: "address",
+              name: "",
+              type: "address",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "getTokenCount",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "platformFeePercent",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "tokenAddress",
+              type: "address",
+            },
+            {
+              internalType: "uint256",
+              name: "amount",
+              type: "uint256",
+            },
+          ],
+          name: "purchaseTokens",
+          outputs: [],
+          stateMutability: "payable",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "tokenAddress",
+              type: "address",
+            },
+            {
+              internalType: "bool",
+              name: "isActive",
+              type: "bool",
+            },
+          ],
+          name: "setTokenActive",
+          outputs: [],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "",
+              type: "address",
+            },
+          ],
+          name: "tokens",
+          outputs: [
+            {
+              internalType: "address",
+              name: "tokenAddress",
+              type: "address",
+            },
+            {
+              internalType: "address",
+              name: "creator",
+              type: "address",
+            },
+            {
+              internalType: "uint256",
+              name: "price",
+              type: "uint256",
+            },
+            {
+              internalType: "uint256",
+              name: "availableSupply",
+              type: "uint256",
+            },
+            {
+              internalType: "bool",
+              name: "isActive",
+              type: "bool",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "tokenAddress",
+              type: "address",
+            },
+            {
+              internalType: "uint256",
+              name: "newPrice",
+              type: "uint256",
+            },
+          ],
+          name: "updateTokenPrice",
+          outputs: [],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+      ],
+      inheritedFunctions: {
+        allowance: "@openzeppelin/contracts/token/ERC20/ERC20.sol",
+        approve: "@openzeppelin/contracts/token/ERC20/ERC20.sol",
+        balanceOf: "@openzeppelin/contracts/token/ERC20/ERC20.sol",
+        decimals: "@openzeppelin/contracts/token/ERC20/ERC20.sol",
+        name: "@openzeppelin/contracts/token/ERC20/ERC20.sol",
+        symbol: "@openzeppelin/contracts/token/ERC20/ERC20.sol",
+        totalSupply: "@openzeppelin/contracts/token/ERC20/ERC20.sol",
+        transfer: "@openzeppelin/contracts/token/ERC20/ERC20.sol",
+        transferFrom: "@openzeppelin/contracts/token/ERC20/ERC20.sol",
+        owner: "@openzeppelin/contracts/access/Ownable.sol",
+        renounceOwnership: "@openzeppelin/contracts/access/Ownable.sol",
+        transferOwnership: "@openzeppelin/contracts/access/Ownable.sol",
+      },
+    },
   },
   421614: {
     BaseJackpot: {

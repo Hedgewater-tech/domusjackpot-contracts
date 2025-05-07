@@ -1,0 +1,37 @@
+{
+  "language": "Solidity",
+  "sources": {
+    "contracts/L1Read.sol": {
+      "content": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.0;\n\ncontract L1Read {\n  struct Position {\n    int64 szi;\n    uint64 entryNtl;\n    int64 isolatedRawUsd;\n    uint32 leverage;\n    bool isIsolated;\n  }\n\n  struct SpotBalance {\n    uint64 total;\n    uint64 hold;\n    uint64 entryNtl;\n  }\n\n  struct UserVaultEquity {\n    uint64 equity;\n    uint64 lockedUntilTimestamp;\n  }\n\n  struct Withdrawable {\n    uint64 withdrawable;\n  }\n\n  struct Delegation {\n    address validator;\n    uint64 amount;\n    uint64 lockedUntilTimestamp;\n  }\n\n  struct DelegatorSummary {\n    uint64 delegated;\n    uint64 undelegated;\n    uint64 totalPendingWithdrawal;\n    uint64 nPendingWithdrawals;\n  }\n\n  struct PerpAssetInfo {\n    string coin;\n    uint32 marginTableId;\n    uint8 szDecimals;\n    uint8 maxLeverage;\n    bool onlyIsolated;\n  }\n\n  struct SpotInfo {\n    string name;\n    uint64[2] tokens;\n  }\n\n  struct TokenInfo {\n    string name;\n    uint64[] spots;\n    uint64 deployerTradingFeeShare;\n    address deployer;\n    address evmContract;\n    uint8 szDecimals;\n    uint8 weiDecimals;\n    int8 evmExtraWeiDecimals;\n  }\n\n  address constant POSITION_PRECOMPILE_ADDRESS = 0x0000000000000000000000000000000000000800;\n  address constant SPOT_BALANCE_PRECOMPILE_ADDRESS = 0x0000000000000000000000000000000000000801;\n  address constant VAULT_EQUITY_PRECOMPILE_ADDRESS = 0x0000000000000000000000000000000000000802;\n  address constant WITHDRAWABLE_PRECOMPILE_ADDRESS = 0x0000000000000000000000000000000000000803;\n  address constant DELEGATIONS_PRECOMPILE_ADDRESS = 0x0000000000000000000000000000000000000804;\n  address constant DELEGATOR_SUMMARY_PRECOMPILE_ADDRESS =\n    0x0000000000000000000000000000000000000805;\n  address constant MARK_PX_PRECOMPILE_ADDRESS = 0x0000000000000000000000000000000000000806;\n  address constant ORACLE_PX_PRECOMPILE_ADDRESS = 0x0000000000000000000000000000000000000807;\n  address constant SPOT_PX_PRECOMPILE_ADDRESS = 0x0000000000000000000000000000000000000808;\n  address constant L1_BLOCK_NUMBER_PRECOMPILE_ADDRESS = 0x0000000000000000000000000000000000000809;\n  address constant PERP_ASSET_INFO_PRECOMPILE_ADDRESS = 0x000000000000000000000000000000000000080a;\n  address constant SPOT_INFO_PRECOMPILE_ADDRESS = 0x000000000000000000000000000000000000080b;\n  address constant TOKEN_INFO_PRECOMPILE_ADDRESS = 0x000000000000000000000000000000000000080C;\n\n  function position(address user, uint16 perp) external view returns (Position memory) {\n    bool success;\n    bytes memory result;\n    (success, result) = POSITION_PRECOMPILE_ADDRESS.staticcall(abi.encode(user, perp));\n    require(success, \"Position precompile call failed\");\n    return abi.decode(result, (Position));\n  }\n\n  function spotBalance(address user, uint64 token) external view returns (SpotBalance memory) {\n    bool success;\n    bytes memory result;\n    (success, result) = SPOT_BALANCE_PRECOMPILE_ADDRESS.staticcall(abi.encode(user, token));\n    require(success, \"SpotBalance precompile call failed\");\n    return abi.decode(result, (SpotBalance));\n  }\n\n  function userVaultEquity(\n    address user,\n    address vault\n  ) external view returns (UserVaultEquity memory) {\n    bool success;\n    bytes memory result;\n    (success, result) = VAULT_EQUITY_PRECOMPILE_ADDRESS.staticcall(abi.encode(user, vault));\n    require(success, \"VaultEquity precompile call failed\");\n    return abi.decode(result, (UserVaultEquity));\n  }\n\n  function withdrawable(address user) external view returns (Withdrawable memory) {\n    bool success;\n    bytes memory result;\n    (success, result) = WITHDRAWABLE_PRECOMPILE_ADDRESS.staticcall(abi.encode(user));\n    require(success, \"Withdrawable precompile call failed\");\n    return abi.decode(result, (Withdrawable));\n  }\n\n  function delegations(address user) external view returns (Delegation[] memory) {\n    bool success;\n    bytes memory result;\n    (success, result) = DELEGATIONS_PRECOMPILE_ADDRESS.staticcall(abi.encode(user));\n    require(success, \"Delegations precompile call failed\");\n    return abi.decode(result, (Delegation[]));\n  }\n\n  function delegatorSummary(address user) external view returns (DelegatorSummary memory) {\n    bool success;\n    bytes memory result;\n    (success, result) = DELEGATOR_SUMMARY_PRECOMPILE_ADDRESS.staticcall(abi.encode(user));\n    require(success, \"DelegatorySummary precompile call failed\");\n    return abi.decode(result, (DelegatorSummary));\n  }\n\n  function markPx(uint32 index) external view returns (uint64) {\n    bool success;\n    bytes memory result;\n    (success, result) = MARK_PX_PRECOMPILE_ADDRESS.staticcall(abi.encode(index));\n    require(success, \"MarkPx precompile call failed\");\n    return abi.decode(result, (uint64));\n  }\n\n  function oraclePx(uint32 index) external view returns (uint64) {\n    bool success;\n    bytes memory result;\n    (success, result) = ORACLE_PX_PRECOMPILE_ADDRESS.staticcall(abi.encode(index));\n    require(success, \"OraclePx precompile call failed\");\n    return abi.decode(result, (uint64));\n  }\n\n  function spotPx(uint32 index) external view returns (uint64) {\n    bool success;\n    bytes memory result;\n    (success, result) = SPOT_PX_PRECOMPILE_ADDRESS.staticcall(abi.encode(index));\n    require(success, \"SpotPx precompile call failed\");\n    return abi.decode(result, (uint64));\n  }\n\n  function l1BlockNumber() external view returns (uint64) {\n    bool success;\n    bytes memory result;\n    (success, result) = L1_BLOCK_NUMBER_PRECOMPILE_ADDRESS.staticcall(abi.encode());\n    require(success, \"L1BlockNumber precompile call failed\");\n    return abi.decode(result, (uint64));\n  }\n\n  function perpAssetInfo(uint32 perp) external view returns (PerpAssetInfo memory) {\n    bool success;\n    bytes memory result;\n    (success, result) = PERP_ASSET_INFO_PRECOMPILE_ADDRESS.staticcall(abi.encode(perp));\n    require(success, \"PerpAssetInfo precompile call failed\");\n    return abi.decode(result, (PerpAssetInfo));\n  }\n\n  function spotInfo(uint32 spot) external view returns (SpotInfo memory) {\n    bool success;\n    bytes memory result;\n    (success, result) = SPOT_INFO_PRECOMPILE_ADDRESS.staticcall(abi.encode(spot));\n    require(success, \"SpotInfo precompile call failed\");\n    return abi.decode(result, (SpotInfo));\n  }\n\n  function tokenInfo(uint32 token) external view returns (TokenInfo memory) {\n    bool success;\n    bytes memory result;\n    (success, result) = TOKEN_INFO_PRECOMPILE_ADDRESS.staticcall(abi.encode(token));\n    require(success, \"TokenInfo precompile call failed\");\n    return abi.decode(result, (TokenInfo));\n  }\n}\n"
+    }
+  },
+  "settings": {
+    "optimizer": {
+      "enabled": true,
+      "runs": 200
+    },
+    "viaIR": true,
+    "evmVersion": "paris",
+    "outputSelection": {
+      "*": {
+        "*": [
+          "abi",
+          "evm.bytecode",
+          "evm.deployedBytecode",
+          "evm.methodIdentifiers",
+          "metadata",
+          "storageLayout",
+          "devdoc",
+          "userdoc",
+          "evm.gasEstimates"
+        ],
+        "": [
+          "ast"
+        ]
+      }
+    },
+    "metadata": {
+      "useLiteralContent": true
+    }
+  }
+}
