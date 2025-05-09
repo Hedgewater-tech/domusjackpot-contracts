@@ -252,6 +252,138 @@ The DomusJackpot contract is a sophisticated jackpot system with liquidity provi
 - Protocol fees are collected
 - Referral fees are distributed to referrers
 
+## 🎰 DomusJackpot Smart Contract
+
+The DomusJackpot contract is an innovative jackpot system with Liquidity Provider (LP) functionality that creates an engaging and sustainable prize mechanism for users.
+
+### Key Features
+
+- **Decentralized Randomness**: Uses Entropy protocol for verifiable and secure random number generation
+- **Liquidity Provider System**: Allows LPs to participate with configurable risk percentages
+- **Ticket Purchase Mechanism**: Users can buy tickets to participate in jackpot rounds
+- **Referral System**: Incentivizes user acquisition through referral rewards
+- **Automated Jackpot Execution**: Scheduled jackpot rounds with configurable duration
+- **Fee Distribution**: Transparent fee structure with allocation to LPs, referrers, and protocol
+- **Upgradeable Design**: Implements UUPS proxy pattern for future upgrades
+- **Configurable Parameters**: Admin controls for ticket price, round duration, fee percentages, etc.
+- **Safety Mechanisms**: Includes locks, limits, and emergency functions
+
+### Contract Structure
+
+The DomusJackpot contract manages two main participant types:
+
+1. **Users**: Purchase tickets to participate in jackpot rounds
+   ```solidity
+   struct User {
+       uint256 ticketsPurchasedTotalBps; // Tickets purchased for current round (basis points)
+       uint256 winningsClaimable;        // Amount of tokens user can withdraw
+       bool active;                      // Whether user is participating in current round
+   }
+   ```
+
+2. **Liquidity Providers (LPs)**: Deposit tokens and set risk percentages
+   ```solidity
+   struct LP {
+       uint256 principal;      // Amount deposited by LP
+       uint256 stake;          // Amount staked in current jackpot round
+       uint256 riskPercentage; // From 0 to 100
+       bool active;            // Whether LP has principal in contract
+   }
+   ```
+
+### Jackpot Operation Flow
+
+#### 1. Initialization and Setup
+
+- Contract is deployed with initial parameters (ticket price, round duration, fee percentages)
+- Token address is set for the jackpot system (ERC20 token used for tickets and rewards)
+- Owner configures limits for LPs and users
+
+#### 2. LP Participation
+
+- LPs deposit tokens using `lpDeposit(riskPercentage, value)`
+- LPs set their risk percentage (1-100%) determining exposure to jackpot outcomes
+- LP deposits are tracked in the `lpsInfo` mapping and `activeLpAddresses` array
+- LPs can adjust risk percentage with `lpAdjustRiskPercentage(riskPercentage)`
+- LPs can withdraw their principal with `withdrawAllLP()` when not staked
+
+#### 3. User Ticket Purchases
+
+- Users purchase tickets with `purchaseTickets(referrer, value, recipient)`
+- Ticket purchases are tracked in `usersInfo` mapping and `activeUserAddresses` array
+- Fees are calculated and distributed:
+  - Referral fees go to referrers
+  - LP fees accumulate for distribution to LPs
+  - Remaining amount goes to user pool
+
+#### 4. Jackpot Execution
+
+1. **Initiation**: Anyone can trigger jackpot after round duration with `runJackpot(userRandomNumber)`
+2. **Random Number Generation**: Contract requests randomness from Entropy protocol
+3. **Entropy Callback**: When randomness is received, `entropyCallback()` processes the jackpot:
+   - `stakeLps()`: Moves LP funds from principal to stake based on risk percentage
+   - `distributeLpFeesToLps()`: Distributes accumulated fees to LPs
+   - `determineWinnerAndAdjustStakes()`: Selects winner and allocates prizes
+
+#### 5. Winner Determination Logic
+
+The contract has three possible outcomes:
+
+1. **User Pool ≥ LP Pool**: 
+   - Winner gets entire user pool
+   - LPs get their stake back
+
+2. **User Pool < LP Pool and User Wins**:
+   - Winner gets entire LP pool
+   - LPs get user pool distributed proportionally to their stakes
+
+3. **User Pool < LP Pool and LP Wins**:
+   - LPs get both user pool and LP pool
+   - No user winner
+
+#### 6. Post-Jackpot Actions
+
+- Winner can claim rewards with `withdrawWinnings()`
+- Referrers can claim fees with `withdrawReferralFees()`
+- New round begins automatically with:
+  - User tickets reset
+  - New LP stakes calculated based on risk percentages
+  - Pool totals reset
+
+### Administrative Controls
+
+- **Ticket Price**: Configurable with `setTicketPrice()`
+- **Round Duration**: Adjustable with `setRoundDurationInSeconds()`
+- **Fee Structure**: Configurable with `setFeeBps()` and `setReferralFeeBps()`
+- **LP Pool Cap**: Set with `setLpPoolCap()`
+- **Protocol Fee**: Managed with `setProtocolFeeAddress()` and `setProtocolFeeThreshold()`
+- **Emergency Controls**: Include `forceReleaseJackpotLock()` for recovery
+
+### Automation
+
+The jackpot system can be automated using:
+- GitHub Actions workflow for scheduled execution
+- Configurable parameters for different networks
+- Script-based interaction for jackpot execution and information retrieval
+
+### Security Features
+
+- Entropy protocol for verifiable randomness
+- Jackpot and entropy callback locks to prevent duplicate execution
+- Withdrawal pattern to prevent reentrancy attacks
+- Principal/stake separation for LP risk management
+- Fallback winner mechanism
+
+### Events
+
+The contract emits events for all major actions:
+- `UserTicketPurchase`: When tickets are purchased
+- `JackpotRunRequested`: When jackpot execution is initiated
+- `JackpotRun`: When jackpot completes with winner information
+- `EntropyResult`: When random number is received
+- `LpDeposit`, `LpRebalance`, `LpRiskPercentageAdjustment`: For LP actions
+- Various withdrawal events for tracking fund movements
+
 #### 5. Automation
 
 - The jackpot execution is automated through a GitHub Actions workflow
