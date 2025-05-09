@@ -78,134 +78,6 @@ We welcome contributions to Scaffold-ETH 2!
 
 Please see [CONTRIBUTING.MD](https://github.com/scaffold-eth/scaffold-eth-2/blob/main/CONTRIBUTING.md) for more information and guidelines for contributing to Scaffold-ETH 2.
 
-## 🚀 TokenPresale Smart Contract
-
-The TokenPresale contract is a flexible and secure solution for conducting token presales with tiered whitelisting and configurable parameters.
-
-### Features
-
-- **Multiple Presale Management**: Create and manage multiple presales with different tokens and parameters
-- **Time-Based Controls**: Configure start and end times for presales
-- **Tiered Whitelisting**: Two-tier whitelisting system with configurable periods
-  - Tier 1: Priority access during the initial phase
-  - Tier 2: Secondary access after Tier 1 period ends
-  - Public: Open to everyone after the whitelisting periods
-- **Deposit Limits**: Set minimum and maximum deposit amounts per user
-- **Total Raise Goal**: Cap the total amount of ETH that can be raised
-- **Project Valuation**: Track the project's valuation in USD
-- **Token Allocation**: Specify the total number of tokens allocated for the presale
-- **Token Distribution**: Users can withdraw tokens after the presale ends
-- **Fund Management**: Owner can withdraw funds after the presale ends
-- **Safety Features**:
-  - Reentrancy protection
-  - Owner-only administrative functions
-  - ERC20 token recovery for accidental transfers
-
-### Contract Structure
-
-```solidity
-struct Presale {
-    uint256 presaleId;
-    address tokenAddress;
-    string tokenSymbol;        // Symbol of the token being sold
-    uint256 tokenPrice;        // Price in ETH per token (in wei)
-    uint256 valuation;         // Project valuation in USD (scaled by 1e18)
-    uint256 totalAllocation;   // Total token allocation for the presale
-    uint256 startTime;
-    uint256 endTime;
-    uint256 minDepositAmount;  // Minimum ETH deposit per user
-    uint256 maxDepositAmount;  // Maximum ETH deposit per user
-    uint256 totalRaiseGoal;    // Total ETH to raise
-    uint256 totalRaised;       // Total ETH raised so far
-    uint256 tier1WhitelistEndTime; // When tier 1 whitelist period ends
-    uint256 tier2WhitelistEndTime; // When tier 2 whitelist period ends
-    bool isActive;             // Whether the presale is active
-}
-```
-
-### Key Functions
-
-#### For Administrators
-
-- `createPresale`: Create a new presale with configurable parameters
-- `addToTier1Whitelist`: Add users to the tier 1 whitelist with specified allocation
-- `addToTier2Whitelist`: Add users to the tier 2 whitelist with specified allocation
-- `setPresaleStatus`: Enable or disable a presale
-- `withdrawFunds`: Withdraw raised ETH after the presale ends
-- `recoverERC20`: Recover ERC20 tokens sent to the contract by mistake
-
-#### For Users
-
-- `deposit`: Participate in a presale by depositing ETH
-- `withdrawTokens`: Withdraw tokens after the presale ends
-- `getUserWhitelistStatus`: Check whitelist status and allocation
-- `calculateTokenAmount`: Calculate tokens to receive for a given ETH amount
-
-### Events
-
-- `PresaleCreated`: Emitted when a new presale is created
-- `Deposit`: Emitted when a user deposits ETH
-- `WhitelistUpdated`: Emitted when a user is added to a whitelist
-- `PresaleUpdated`: Emitted when a presale's status is updated
-- `TokensWithdrawn`: Emitted when a user withdraws tokens
-- `FundsWithdrawn`: Emitted when the owner withdraws funds
-
-### Deployment
-
-The TokenPresale contract can be deployed using the provided deployment script:
-
-```bash
-yarn hardhat:deploy
-```
-
-This will deploy the TokenPresale contract and set up a test presale with the HTEST token if specified.
-
-### Testing
-
-A comprehensive test suite is available to verify the functionality of the TokenPresale contract:
-
-```bash
-yarn hardhat:test test/TokenPresale.ts
-```
-
-The tests cover all aspects of the contract, including:
-
-- Deployment and setup
-- Whitelisting functionality
-- Deposit mechanisms and restrictions
-- Token withdrawal processes
-- Fund withdrawal for the owner
-- Admin functions for managing the presale
-
-### Security Considerations
-
-- The contract uses OpenZeppelin's ReentrancyGuard to prevent reentrancy attacks
-- Administrative functions are protected with the Ownable modifier
-- Time-based validations ensure operations occur in the correct sequence
-- Deposit limits protect against excessive contributions
-- Whitelist validations ensure only authorized users can participate during restricted periods
-
-### Compiler Settings
-
-The contract requires the IR-based code generation due to its complexity:
-
-```javascript
-// In hardhat.config.ts
-solidity: {
-  compilers: [
-    {
-      version: "0.8.20",
-      settings: {
-        optimizer: {
-          enabled: true,
-          runs: 200,
-        },
-        viaIR: true, // Required for this contract
-      },
-    },
-  ],
-}
-```
 
 ## 🎰 DomusJackpot Smart Contract
 
@@ -251,6 +123,138 @@ The DomusJackpot contract is a sophisticated jackpot system with liquidity provi
 - LP providers receive returns based on their risk percentage
 - Protocol fees are collected
 - Referral fees are distributed to referrers
+
+## 🎰 DomusJackpot Smart Contract
+
+The DomusJackpot contract is an innovative jackpot system with Liquidity Provider (LP) functionality that creates an engaging and sustainable prize mechanism for users.
+
+### Key Features
+
+- **Decentralized Randomness**: Uses Entropy protocol for verifiable and secure random number generation
+- **Liquidity Provider System**: Allows LPs to participate with configurable risk percentages
+- **Ticket Purchase Mechanism**: Users can buy tickets to participate in jackpot rounds
+- **Referral System**: Incentivizes user acquisition through referral rewards
+- **Automated Jackpot Execution**: Scheduled jackpot rounds with configurable duration
+- **Fee Distribution**: Transparent fee structure with allocation to LPs, referrers, and protocol
+- **Upgradeable Design**: Implements UUPS proxy pattern for future upgrades
+- **Configurable Parameters**: Admin controls for ticket price, round duration, fee percentages, etc.
+- **Safety Mechanisms**: Includes locks, limits, and emergency functions
+
+### Contract Structure
+
+The DomusJackpot contract manages two main participant types:
+
+1. **Users**: Purchase tickets to participate in jackpot rounds
+   ```solidity
+   struct User {
+       uint256 ticketsPurchasedTotalBps; // Tickets purchased for current round (basis points)
+       uint256 winningsClaimable;        // Amount of tokens user can withdraw
+       bool active;                      // Whether user is participating in current round
+   }
+   ```
+
+2. **Liquidity Providers (LPs)**: Deposit tokens and set risk percentages
+   ```solidity
+   struct LP {
+       uint256 principal;      // Amount deposited by LP
+       uint256 stake;          // Amount staked in current jackpot round
+       uint256 riskPercentage; // From 0 to 100
+       bool active;            // Whether LP has principal in contract
+   }
+   ```
+
+### Jackpot Operation Flow
+
+#### 1. Initialization and Setup
+
+- Contract is deployed with initial parameters (ticket price, round duration, fee percentages)
+- Token address is set for the jackpot system (ERC20 token used for tickets and rewards)
+- Owner configures limits for LPs and users
+
+#### 2. LP Participation
+
+- LPs deposit tokens using `lpDeposit(riskPercentage, value)`
+- LPs set their risk percentage (1-100%) determining exposure to jackpot outcomes
+- LP deposits are tracked in the `lpsInfo` mapping and `activeLpAddresses` array
+- LPs can adjust risk percentage with `lpAdjustRiskPercentage(riskPercentage)`
+- LPs can withdraw their principal with `withdrawAllLP()` when not staked
+
+#### 3. User Ticket Purchases
+
+- Users purchase tickets with `purchaseTickets(referrer, value, recipient)`
+- Ticket purchases are tracked in `usersInfo` mapping and `activeUserAddresses` array
+- Fees are calculated and distributed:
+  - Referral fees go to referrers
+  - LP fees accumulate for distribution to LPs
+  - Remaining amount goes to user pool
+
+#### 4. Jackpot Execution
+
+1. **Initiation**: Anyone can trigger jackpot after round duration with `runJackpot(userRandomNumber)`
+2. **Random Number Generation**: Contract requests randomness from Entropy protocol
+3. **Entropy Callback**: When randomness is received, `entropyCallback()` processes the jackpot:
+   - `stakeLps()`: Moves LP funds from principal to stake based on risk percentage
+   - `distributeLpFeesToLps()`: Distributes accumulated fees to LPs
+   - `determineWinnerAndAdjustStakes()`: Selects winner and allocates prizes
+
+#### 5. Winner Determination Logic
+
+The contract has three possible outcomes:
+
+1. **User Pool ≥ LP Pool**: 
+   - Winner gets entire user pool
+   - LPs get their stake back
+
+2. **User Pool < LP Pool and User Wins**:
+   - Winner gets entire LP pool
+   - LPs get user pool distributed proportionally to their stakes
+
+3. **User Pool < LP Pool and LP Wins**:
+   - LPs get both user pool and LP pool
+   - No user winner
+
+#### 6. Post-Jackpot Actions
+
+- Winner can claim rewards with `withdrawWinnings()`
+- Referrers can claim fees with `withdrawReferralFees()`
+- New round begins automatically with:
+  - User tickets reset
+  - New LP stakes calculated based on risk percentages
+  - Pool totals reset
+
+### Administrative Controls
+
+- **Ticket Price**: Configurable with `setTicketPrice()`
+- **Round Duration**: Adjustable with `setRoundDurationInSeconds()`
+- **Fee Structure**: Configurable with `setFeeBps()` and `setReferralFeeBps()`
+- **LP Pool Cap**: Set with `setLpPoolCap()`
+- **Protocol Fee**: Managed with `setProtocolFeeAddress()` and `setProtocolFeeThreshold()`
+- **Emergency Controls**: Include `forceReleaseJackpotLock()` for recovery
+
+### Automation
+
+The jackpot system can be automated using:
+- GitHub Actions workflow for scheduled execution
+- Configurable parameters for different networks
+- Script-based interaction for jackpot execution and information retrieval
+
+### Security Features
+
+- Entropy protocol for verifiable randomness
+- Jackpot and entropy callback locks to prevent duplicate execution
+- Withdrawal pattern to prevent reentrancy attacks
+- Principal/stake separation for LP risk management
+- Fallback winner mechanism
+
+### Events
+
+The contract emits events for all major actions:
+- `UserTicketPurchase`: When tickets are purchased
+- `JackpotRunRequested`: When jackpot execution is initiated
+- `JackpotRun`: When jackpot completes with winner information
+- `EntropyResult`: When random number is received
+- `LpDeposit`, `LpRebalance`, `LpRiskPercentageAdjustment`: For LP actions
+- Various withdrawal events for tracking fund movements
 
 #### 5. Automation
 
