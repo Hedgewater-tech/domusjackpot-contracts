@@ -2,8 +2,8 @@ name: Jackpot Automation
 
 on:
   schedule:
-    # Run every 10 minutes to check if jackpot can be executed
-    - cron: "*/10 * * * *"
+    # Run once per year on January 1st at 00:00 UTC
+    - cron: "0 0 1 1 *"
   workflow_dispatch:
     # Allow manual triggering with options
     inputs:
